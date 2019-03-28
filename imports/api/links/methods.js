@@ -21,6 +21,7 @@ Meteor.methods({
 });
 
 //configure a random factory
+/*
 export const makePrivate = new ValidatedMethod({
   name: 'Lists.methods.makePrivate',
 
@@ -64,27 +65,63 @@ export const makePrivate = new ValidatedMethod({
     Lists.userIdDenormalizer.set(listId, this.userId);
   }
 });
+*/
 
-export const RandomProducers = new ValidatedMethod({
+export const RandomProducer = new ValidatedMethod({
   name: 'producers.makeRandom',
-  // validate: new SimpleSchema({
-  //   todoId: { type: String },
-  //   newText: { type: String }
-  // }).validator(),
-  run({ }) {
+  run({chosenType = 0}) {
     const todo = Todos.findOne(todoId);
 
-    if (!todo.editableBy(this.userId)) {
-      throw new Meteor.Error('todos.updateText.unauthorized',
-        'Cannot edit todos in a private list that is not yours');
+    // if (!todo.editableBy(this.userId)) {
+    //   throw new Meteor.Error('todos.updateText.unauthorized',
+    //     'Cannot edit todos in a private list that is not yours');
+    // }
+
+    // Todos.update(todoId, {
+    //   $set: { text: newText }
+    // });
+
+    if (!this.isSimulation) {
+        var buyCosts = {
+          "m1": { "m1": 0, "f1": 2, "m2": 1, "f2": 0 },
+          "m2": { "m1": 1, "f1": 0, "m2": 0, "f2": 2 },
+          "f1": { "m1": 1, "f1": 0, "m2": 0, "f2": 1 },
+          "f2": { "m1": 0, "f1": 1, "m2": 1, "f2": 0 },
+          "p1": { "m1": 2, "f1": 0, "m2": 2, "f2": 0 },
+          "p2": { "m1": 0, "f1": 2, "m2": 0, "f2": 2 },
+        }
+        var prodValues = {
+          "m1": {"m1": 2, "poll": 2},
+          "m2": {"m2": 2, "poll": 2},
+          "f1": {"f1": 2, "poll": 1},
+          "f2": {"f2": 2, "poll": 1},
+          "p1": {"poll": -3},
+          "p2": {"poll": -2},
+        }
+        var kinds = Object.keys(prodCosts);
+        
+        //make this kindChosen number random, or incrementing
+        var kindChosen = kinds[chosenType];
+
+        var currentProd = {
+          "kind": kindChosen,
+          "buyCost": buyCosts[kindChosen],
+          "prodValues": prodValues[kindChosen],
+          "owned": false,
+          "visible": true,
+          "owner": 0
+        };
+
+        //pick a random kind
+        //populate producers with a producer with a prod cost, prodvalues, ""
+        Producers.insert(currentProd);
     }
 
-    Todos.update(todoId, {
-      $set: { text: newText }
-    });
+
   }
 });
 
+/*
 export const RandomProducers = new ValidatedMethod({
   name: 'Lists.methods.RandomProducers',
   // validate: new SimpleSchema({
@@ -149,6 +186,7 @@ function RandomProd(chosenType = 0) {
   //populate producers with a producer with a prod cost, prodvalues, ""
   Producers.insert(currentProd);
 }
+*/
 
 function FlushProducers() {
   Producers.update({$and: [{"owned": false, "visible": true}]}, {$set: {"visible": true}});
@@ -157,7 +195,6 @@ function FlushProducers() {
 function ConsumeResources() {
   // for each owned Producers, update 
   // Cities.update()
-
 
 }
 
