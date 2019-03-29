@@ -20,58 +20,13 @@ Meteor.methods({
   },
 });
 
-//configure a random factory
-/*
-export const makePrivate = new ValidatedMethod({
-  name: 'Lists.methods.makePrivate',
-
-  // Validation function for the arguments. Only keyword arguments are accepted,
-  // so the arguments are an object rather than an array. The SimpleSchema validator
-  // throws a ValidationError from the mdg:validation-error package if the args don't
-  // match the schema
-  validate: new SimpleSchema({
-    listId: { type: String }
-  }).validator(),
-
-  // This is optional, but you can use this to pass options into Meteor.apply every
-  // time this method is called.  This can be used, for instance, to ask meteor not
-  // to retry this method if it fails.
-  applyOptions: {
-    noRetry: true,
-  },
-
-  // This is the body of the method. Use ES2015 object destructuring to get
-  // the keyword arguments
-  run({ listId }) {
-    // `this` is the same method invocation object you normally get inside
-    // Meteor.methods
-    if (!this.userId) {
-      // Throw errors with a specific error code
-      throw new Meteor.Error('Lists.methods.makePrivate.notLoggedIn',
-        'Must be logged in to make private lists.');
-    }
-
-    const list = Lists.findOne(listId);
-
-    if (list.isLastPublicList()) {
-      throw new Meteor.Error('Lists.methods.makePrivate.lastPublicList',
-        'Cannot make the last public list private.');
-    }
-
-    Lists.update(listId, {
-      $set: { userId: this.userId }
-    });
-
-    Lists.userIdDenormalizer.set(listId, this.userId);
-  }
-});
-*/
 
 export const RandomProducer = new ValidatedMethod({
   name: 'producers.makeRandom',
-  run({chosenType = 0}) {
-    const todo = Todos.findOne(todoId);
-
+  validate ({}) {},
+  run({chosenType}) {
+    // const todo = Todos.findOne(todoId);
+    chosenType = Math.floor(Math.random()*6);
     if (!this.isSimulation) {
         var buyCosts = {
           "m1": { "m1": 0, "f1": 2, "m2": 1, "f2": 0 },
@@ -89,7 +44,7 @@ export const RandomProducer = new ValidatedMethod({
           "p1": {"poll": -3},
           "p2": {"poll": -2},
         };
-        var kinds = Object.keys(prodCosts);
+        var kinds = Object.keys(buyCosts);
         
         //make this kindChosen number random, or incrementing
         var kindChosen = kinds[chosenType];
@@ -114,14 +69,17 @@ export const RandomProducer = new ValidatedMethod({
 
 export const BuyProducer = new ValidatedMethod({
   name: 'producers.buy',
+  validate ({}) {},
   // validate ({}) {
 
   // },
   run({player, producer}) {
+    console.log(player + " " + producer);
+
     if (!this.isSimulation) {
-      cost = Producers.findOne({"_id": producerID}).buyCost;
-      if (Cities.find({"player": player})) { // ***fix syntax here to check for contents
-        res =  Cities.findOne({"player": player}).resources;
+      cost = Producers.findOne({"_id": producer}).buyCost;
+      if (Cities.find({"name": player})) { // ***fix syntax here to check for contents
+        res =  Cities.findOne({"name": player}).res;
         canbuy = true;
         newres = res;
         for (r in cost) {
@@ -133,8 +91,8 @@ export const BuyProducer = new ValidatedMethod({
           }
         }
         if (canbuy == true){
-          Producers.update({"_id": producerID}, {$set: {"owned": true, "owner": player}});
-          Cities.update({"player": player}, {$set: {"resources": res}});
+          Producers.update({"_id": producer}, {$set: {"owned": true, "owner": player}});
+          Cities.update({"name": player}, {$set: {"res": res}});
         }
       }
     }
@@ -142,29 +100,77 @@ export const BuyProducer = new ValidatedMethod({
   }
 });
 
+export const ConsumeResources = new ValidatedMethod({
+  name: 'producers.consume',
+  validate ({}) {},
+  run ({}) {
+    Producers.find({$and: [{"owned": true}]}).forEach(function (prod) {
+      city = Cities.findOne({"name": prod["owner"]});
+      res = city.res;
+      for (r in prod.prodValues) {
+        if (r != "poll"){
+          res[r] += prod.prodValues[r];
+        }
+      }
+      Cities.update({"_id": city._id}, {$set: {"res": res, "poll": city.poll + prod.prodValues["poll"]}});
+    });
+  }
+});
+
 export const NewRound = new ValidatedMethod({
   name: 'newRound',
+  validate ({}) {},
   run({}) {
-    // ConsumeResources.call({}, (err, res) => {
-    //   if (err) {console.log(err);}
-    // });
+    ConsumeResources.call({}, (err, res) => {
+      if (err) {console.log(err);}
+    });
 
     FlushProducers.call({}, (err, res) => {
       if (err) {console.log(err);}
     });
 
     for (var i = 0; i < 6; i++) { 
-      RandomProd.call({i}, (err, res) => {
+      RandomProducer.call({"chosenType": i}, (err, res) => {
         if (err) {console.log(err);}
       });
     }
+    console.log("new round called");
   }
 });
 
 export const FlushProducers = new ValidatedMethod({
   name: 'producers.flush',
+  validate ({}) {},
   run ({}){
-    Producers.update({$and: [{"owned": false, "visible": true}]}, {$set: {"visible": false}});
+    Producers.update({$and: [{"owned": false, "visible": true}]}, {$set: {"visible": false}}, {multi: true});
+    console.log("producers flushed");
+  }
+});
+
+export const TradeResources = new ValidatedMethod({
+  name: 'resources.trade',
+  validate ({amount, resource, from, to}) {
+    const errors = [];
+    if (amount < 0) {
+      errors.push("negative number");
+    }
+    if (errors.length) {
+      throw new ValidationError(errors);
+    }
+  },
+  run ({amount, resource, from, to}){
+    // Producers.update({$and: [{"owned": false, "visible": true}]}, {$set: {"visible": false}}, {multi: true});
+    // console.log("producers flushed");
+    resres = "res." + resource;
+    // Cities.findOne({"_id": from})
+    console.log(Cities.findOne({"name": from}));
+    console.log(from);
+
+    if(Cities.findOne({"name": from}).res[resource] >= amount){
+      Cities.update({"name": from}, {$inc: {resres: (-1*amount)}});
+      Cities.update({"name": to}, {$inc: {resres: (1*amount)}});
+    }
+    else {console.log("under resourced");}
   }
 });
 
@@ -173,11 +179,5 @@ function ConsumeResources() {
   // for each owned Producers, update 
   // Cities.update()
 
-}
-
-function NewRound() {
-  ConsumeResources();
-  FlushProducers();
-  for (var i = 0; i < 6; i++) { RandomProd(i);}
 }
 */

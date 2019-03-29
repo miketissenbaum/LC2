@@ -1,0 +1,24 @@
+<template name="trade">
+  <h3> Trade! </h3>
+  <form class="trade">
+    <input type="number" name="amount" placeholder="Amount to send" />
+    <select id="resource">
+      {{#each resource}}
+        <option value = {{name}}>{{name}}</option>
+      {{/each}}
+    </select>
+
+    To: <select id="to-city">
+      {{#each city}}
+        <option value = {{name}}>{{name}}</option>
+      {{/each}}
+    </select>
+
+    From: <select id="from-city">
+      {{#each city}}
+        <option value = {{name}}>{{name}}</option>
+      {{/each}}
+    </select>
+    <input type="submit" value="trade"/>
+  </form>
+</template>

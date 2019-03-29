@@ -1,0 +1,37 @@
+<template name="cities">
+  <table cellpadding="10">
+    <tr>
+    	{{#each allCities}}
+        <td width = 50%>
+          {{> city}}
+        </td>
+      {{/each}}
+    </tr>
+  </table>
+  
+  <!-- <p>You've pressed the button {{counter}} times.</p> -->
+</template>
+
+
+<template name="city">
+  <!-- {{}} -->
+  Name: {{name}} <br />
+  m1: {{res.m1}}    m2: {{res.m2}} <br />
+  f1: {{res.f1}}    f2: {{res.f2}} <br />
+  pollution: {{poll}}    population: {{pop}} <br />
+  <table cellpadding="10">
+    <tr>
+      {{#each cityFactories}}
+        <td>
+          {{> cityFactory}}
+        </td>
+      {{/each}}
+    </tr>
+  </table>
+      
+</template>
+
+<template name="cityFactory">
+  You have a {{kind}} producer. <br />
+  {{productionValues}}
+</template>

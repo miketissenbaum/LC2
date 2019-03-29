@@ -1,8 +1,26 @@
-<template name="card">
-	{{#each PublicFactories}}
-		<!-- {{}} -->
-		
-	{{/each}}
-<!--   <button>Buy</button>
-  <p>You've pressed the button {{counter}} times.</p> -->
+<template name="factoryList">
+  <table cellpadding="10">
+    <tr>
+    	{{#each PublicFactories}}
+        <td>
+          {{> factory}}
+        </td>
+      {{/each}}
+    </tr>
+  </table>
+  <button class="newRound">Next Round</button>
+  <!-- <p>You've pressed the button {{counter}} times.</p> -->
+  <!-- <button class="toggleCity">{{CurrentCity}} - Toggle selection</button> -->
+</template>
+
+
+<template name="factory">
+<!-- {{}} -->
+    {{kind}} - {{ProductionText}} <br />
+    <!-- You can buy it for 
+    {{buyCost.m1}} of m1, {{buyCost.f1}} of f1, {{buyCost.m2}} of m2, {{buyCost.f2}} of f2,  -->
+    {{CostInfo}} and produces {{prodValues.poll}} pollution.
+    
+    <br />
+    <button class="buy1">Buy city 1</button> <button class="buy2">Buy city 2</button>
 </template>
