@@ -163,14 +163,27 @@ export const TradeResources = new ValidatedMethod({
     // console.log("producers flushed");
     resres = "res." + resource;
     // Cities.findOne({"_id": from})
-    console.log(Cities.findOne({"name": from}));
-    console.log(from);
-
-    if(Cities.findOne({"name": from}).res[resource] >= amount){
-      Cities.update({"name": from}, {$inc: {resres: (-1*amount)}});
-      Cities.update({"name": to}, {$inc: {resres: (1*amount)}});
+    // console.log(Cities.findOne({"name": from}));
+    // console.log(from);
+    fromres = Cities.findOne({"name": from}).res;
+    tores = Cities.findOne({"name": to}).res;
+    if(parseInt(fromres[resource]) >= amount){
+      fromres[resource] = parseInt(fromres[resource]) - parseInt(amount);
+      tores[resource] = parseInt(tores[resource]) +  parseInt(amount);
+      Cities.update({"name": from}, {$set: {"res": fromres}});
+      Cities.update({"name": to}, {$set: {"res": tores}});
     }
     else {console.log("under resourced");}
+  }
+});
+
+export const ResetAll = new ValidatedMethod({
+  name: 'setup.all',
+  validate({}) {},
+  run({}) {
+    Cities.update({"name": "city1"}, {$set: {"name": "city1", "res": {"m1": 2, "m2": 2, "f1": 2, "f2": 2}, "poll": 0, "pop": 5}}, {upsert: true})
+    Cities.update({"name": "city2"}, {$set: {"name": "city2", "res": {"m1": 2, "m2": 2, "f1": 2, "f2": 2}, "poll": 0, "pop": 5}}, {upsert: true})
+    Producers.remove({});
   }
 });
 

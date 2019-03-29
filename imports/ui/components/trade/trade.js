@@ -2,6 +2,7 @@ import './trade.html';
 import { Meteor } from 'meteor/meteor';
 import { Cities } from '/imports/api/links/links.js';
 import { TradeResources } from '/imports/api/links/methods.js';
+import { ResetAll } from '/imports/api/links/methods.js';
 
 Template.trade.onCreated(function helloOnCreated() {
   // counter starts at 0
@@ -32,11 +33,17 @@ Template.trade.events({
       console.log("empty val");
     }
     else {
-      TradeResources.call({"amount": val, "resource": res, "from": from, "to": to})
+      TradeResources.call({"amount": parseInt(val), "resource": res, "from": from, "to": to});
     }
     // console.log(event.target["to-city"].value);
     
   },
+
+  'click .reset' (event, instance) {
+    ResetAll.call({}, (err, res) => {
+      if (err) {console.log(err);}
+    });
+  }
 
   
 });
