@@ -18,11 +18,12 @@
   Name: {{name}} <br />
   m1: {{res.m1}}    m2: {{res.m2}} <br />
   f1: {{res.f1}}    f2: {{res.f2}} <br />
-  pollution: {{poll}}    population: {{pop}} <br />
+  pollution: {{poll}}    population: {{population}}  happiness: {{happiness}}<br />
+
   <table cellpadding="10">
     <tr>
       {{#each cityFactories}}
-        <td>
+        <td bgcolor="{{producerColor}}">
           {{> cityFactory}}
         </td>
       {{/each}}
@@ -33,5 +34,6 @@
 
 <template name="cityFactory">
   You have a {{kind}} producer. <br />
-  {{productionValues}}
+  Produces:{{productionValues}} <br />
+  While using: {{productionCosts}}
 </template>

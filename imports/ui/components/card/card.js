@@ -33,6 +33,20 @@ Template.factoryList.helpers({
 
   CurrentCity() {
     return Template.instance().city.get();
+  },
+
+  factoryColor() {
+    producerColors = {
+      "p1": "#BBFF99",
+      "p2": "#BBFF99",
+      "m1": "#C6C6DB",
+      "m2": "#C6C6DB",
+      "f1": "#FFFF80",
+      "f2": "#FFFF80"
+    }
+    console.log(this);
+    return producerColors[this.kind];
+    // return this;
   }
 
 });

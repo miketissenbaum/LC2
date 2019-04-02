@@ -5,6 +5,7 @@ import { check } from 'meteor/check';
 import { Links } from './links.js';
 import { Producers } from './links.js';
 import { Cities } from './links.js';
+import { History } from './links.js';
 import { ValidatedMethod } from 'meteor/mdg:validated-method';
 
 Meteor.methods({
@@ -37,12 +38,20 @@ export const RandomProducer = new ValidatedMethod({
           "p2": { "m1": 0, "f1": 2, "m2": 0, "f2": 2 },
         };
         var prodValues = {
-          "m1": {"m1": 2, "poll": 2},
-          "m2": {"m2": 2, "poll": 2},
-          "f1": {"f1": 2, "poll": 1},
-          "f2": {"f2": 2, "poll": 1},
+          "m1": {"m1": 3, "poll": 2},
+          "m2": {"m2": 3, "poll": 2},
+          "f1": {"f1": 3, "poll": 1},
+          "f2": {"f2": 3, "poll": 1},
           "p1": {"poll": -3},
           "p2": {"poll": -2},
+        };
+        var prodCosts = {
+          "m1": { "m1": 0, "f1": 1, "m2": 0, "f2": 0 },
+          "m2": { "m1": 0, "f1": 0, "m2": 0, "f2": 1 },
+          "f1": { "m1": 1, "f1": 0, "m2": 0, "f2": 0 },
+          "f2": { "m1": 0, "f1": 0, "m2": 1, "f2": 0 },
+          "p1": { "m1": 0, "f1": 0, "m2": 0, "f2": 0 },
+          "p2": { "m1": 0, "f1": 0, "m2": 0, "f2": 0 },
         };
         var kinds = Object.keys(buyCosts);
         
@@ -53,6 +62,7 @@ export const RandomProducer = new ValidatedMethod({
           "kind": kindChosen,
           "buyCost": buyCosts[kindChosen],
           "prodValues": prodValues[kindChosen],
+          "prodCosts": prodCosts[kindChosen],
           "owned": false,
           "visible": true,
           "owner": 0
@@ -77,9 +87,12 @@ export const BuyProducer = new ValidatedMethod({
     console.log(player + " " + producer);
 
     if (!this.isSimulation) {
-      cost = Producers.findOne({"_id": producer}).buyCost;
+      prod = Producers.findOne({"_id": producer})
+      cost = prod.buyCost;
       if (Cities.find({"name": player})) { // ***fix syntax here to check for contents
-        res =  Cities.findOne({"name": player}).res;
+        thisCity = Cities.findOne({"name": player});
+        res =  thisCity.res;
+        factCount = thisCity.factoryCount;
         canbuy = true;
         newres = res;
         for (r in cost) {
@@ -91,8 +104,10 @@ export const BuyProducer = new ValidatedMethod({
           }
         }
         if (canbuy == true){
+          factCount[prod.kind] += 1;
           Producers.update({"_id": producer}, {$set: {"owned": true, "owner": player}});
-          Cities.update({"name": player}, {$set: {"res": res}});
+          Cities.update({"name": player}, {$set: {"res": res, "factoryCount": factCount}});
+
         }
       }
     }
@@ -104,16 +119,68 @@ export const ConsumeResources = new ValidatedMethod({
   name: 'producers.consume',
   validate ({}) {},
   run ({}) {
-    Producers.find({$and: [{"owned": true}]}).forEach(function (prod) {
-      city = Cities.findOne({"name": prod["owner"]});
+    // city = Cities.findOne({"name": prod["owner"]});
+    Cities.find({}).forEach(function (city) {
       res = city.res;
-      for (r in prod.prodValues) {
-        if (r != "poll"){
-          res[r] += prod.prodValues[r];
+      newpoll = parseInt(city.poll) * 1.0;
+      newpop = parseInt(city.population);
+      newhapp = parseInt(city.happiness);
+      freshFactCount = {"m1": 0, "m2": 0, "f1": 0, "f2": 0, "p1": 0, "p2": 0};
+      factCount = city.factoryCount;
+      parks = 0;
+      Producers.find({$and: [{"owned": true}, {"owner": city.name}]}).forEach(function (prod) {
+        efficiency = 1;
+        if (factCount[prod.kind] > 1) {
+          efficiency = 1.3;
         }
+        for (r in prod.prodValues) {
+          if (r != "poll"){
+            res[r] += Math.round(prod.prodValues[r] * efficiency);
+          }
+          // else {
+            
+          // }
+        }
+        for (r in prod.prodCosts) {
+          res[r] -= prod.prodCosts[r];
+        }
+        freshFactCount
+        if (prod.kind == "p1" || prod.kind == "p1") {
+          parks += 1;
+          // console.log(parks + " number of parks");
+        }
+        newpoll = city.poll + prod.prodValues["poll"];
+        console.log(newpoll);
+
+      });
+
+      if ((res.f1 + res.f2) / newpoll > 2) {
+        newpop = newpop + 1;
+        // console.log((res.f1 + res.f2) + " food" + newpoll + " pollution, excess food population increase");
+        // console.log(newpop);
       }
-      Cities.update({"_id": city._id}, {$set: {"res": res, "poll": city.poll + prod.prodValues["poll"]}});
+
+      else if ((res.f1 + res.f2) / newpoll < 0.8) {
+        newpop = newpop - 1;
+        // console.log((res.f1 + res.f2) + " food" + newpoll + " pollution, lack of food population decrease");
+        // console.log("lack of food population decrease");
+        // console.log(newpop);
+      }
+      // console.log(newpop);
+      // if ((res.f1 + res.f2) / newpoll > 1.8) {
+      //   newpop += 1;
+      //   console.log("lack of food population decrease");
+      // }
+
+      if ((freshFactCount["p1"] + freshFactCount["p2"]*1.0) / newpop  <= 0.2) {
+        newhapp -= 1;
+        // console.log("parks to population increase");
+      }
+
+      Cities.update({"_id": city._id}, {$set: {"res": res, "poll": newpoll, "happiness": newhapp, "population": newpop}});
+      History.insert({"time": new Date().getTime(), "city": city.name, "cityid": city._id, "res": res, "poll": newpoll, "happiness": newhapp, "population": newpop});
     });
+    
   }
 });
 
@@ -181,8 +248,9 @@ export const ResetAll = new ValidatedMethod({
   name: 'setup.all',
   validate({}) {},
   run({}) {
-    Cities.update({"name": "city1"}, {$set: {"name": "city1", "res": {"m1": 2, "m2": 2, "f1": 2, "f2": 2}, "poll": 0, "pop": 5}}, {upsert: true})
-    Cities.update({"name": "city2"}, {$set: {"name": "city2", "res": {"m1": 2, "m2": 2, "f1": 2, "f2": 2}, "poll": 0, "pop": 5}}, {upsert: true})
+    factCount = {"m1": 0, "m2": 0, "f1": 0, "f2": 0, "p1": 0, "p2": 0};
+    Cities.update({"name": "city1"}, {$set: {"name": "city1", "factoryCount": factCount, "res": {"m1": 2, "m2": 2, "f1": 2, "f2": 2}, "poll": 0, "population": 5, "happiness": 5}}, {upsert: true})
+    Cities.update({"name": "city2"}, {$set: {"name": "city2", "factoryCount": factCount, "res": {"m1": 2, "m2": 2, "f1": 2, "f2": 2}, "poll": 0, "population": 5, "happiness": 5}}, {upsert: true})
     Producers.remove({});
   }
 });

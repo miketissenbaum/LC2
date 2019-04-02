@@ -37,6 +37,20 @@ Template.city.helpers({
   cityFactories() {
     // console.log(Producers.find({$and: [{"owned": true}, {"owner": this.name}]}).fetch());
     return Producers.find({$and: [{"owned": true}, {"owner": this.name}]});
+  },
+
+  producerColor() {
+    producerColors = {
+      "p1": "#BBFF99",
+      "p2": "#BBFF99",
+      "m1": "#C6C6DB",
+      "m2": "#C6C6DB",
+      "f1": "#FFFF80",
+      "f2": "#FFFF80"
+    }
+    console.log(this);
+    return producerColors[this.kind];
+    // return this;
   }
 });
 
@@ -56,5 +70,19 @@ Template.cityFactory.helpers({
     return prodText;
 
     // return Producers.find({$and: [{"owned": true}, {"owner": this.name}]});
+  },
+  
+  productionCosts() {
+    costText = "";
+    console.log(this.prodCosts);
+    for (r in this.prodCosts) {
+      if (this.prodCosts[r] != 0) {
+        costText += this.prodCosts[r] + " " + r + "   ";
+      }
+    }
+    // prodText += " Pollution: " + this.prodValues["poll"];
+    console.log(costText);
+
+    return costText;
   }
 });
