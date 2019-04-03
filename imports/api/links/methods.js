@@ -65,7 +65,8 @@ export const RandomProducer = new ValidatedMethod({
           "prodCosts": prodCosts[kindChosen],
           "owned": false,
           "visible": true,
-          "owner": 0
+          "owner": 0,
+          "durability": 0
         };
 
         //pick a random kind
@@ -118,6 +119,7 @@ export const BuyProducer = new ValidatedMethod({
 export const ConsumeResources = new ValidatedMethod({
   name: 'producers.consume',
   validate ({}) {},
+
   run ({}) {
     // city = Cities.findOne({"name": prod["owner"]});
     Cities.find({}).forEach(function (city) {
@@ -130,51 +132,59 @@ export const ConsumeResources = new ValidatedMethod({
       parks = 0;
       Producers.find({$and: [{"owned": true}, {"owner": city.name}]}).forEach(function (prod) {
         efficiency = 1;
+        dur = prod.durability;
         if (factCount[prod.kind] > 1) {
           efficiency = 1.3;
         }
-        for (r in prod.prodValues) {
-          if (r != "poll"){
-            res[r] += Math.round(prod.prodValues[r] * efficiency);
-          }
-          // else {
-            
-          // }
-        }
+        affordable = true;
         for (r in prod.prodCosts) {
-          res[r] -= prod.prodCosts[r];
+          if ((res[r] -  prod.prodCosts[r]) < 0) {
+            affordable = false;
+          }
         }
-        freshFactCount
+        if (affordable == true){
+          for (r in prod.prodCosts) {
+            res[r] -= prod.prodCosts[r];
+          }
+          for (r in prod.prodValues) {
+            if (r != "poll"){
+              res[r] += Math.round(prod.prodValues[r] * efficiency);
+            }
+            else {
+                newpoll = newpoll + prod.prodValues[r];
+            }
+          }
+        }
+        else {
+          dur += 1;
+          Producers.update({_id: prod._id}, {$set: {"durability": dur}})
+        }
+        freshFactCount[prod.kind] += 1;
+        
         if (prod.kind == "p1" || prod.kind == "p1") {
           parks += 1;
           // console.log(parks + " number of parks");
         }
-        newpoll = city.poll + prod.prodValues["poll"];
+        
         console.log(newpoll);
 
       });
 
       if ((res.f1 + res.f2) / newpoll > 2) {
         newpop = newpop + 1;
-        // console.log((res.f1 + res.f2) + " food" + newpoll + " pollution, excess food population increase");
-        // console.log(newpop);
       }
 
       else if ((res.f1 + res.f2) / newpoll < 0.8) {
         newpop = newpop - 1;
-        // console.log((res.f1 + res.f2) + " food" + newpoll + " pollution, lack of food population decrease");
-        // console.log("lack of food population decrease");
-        // console.log(newpop);
       }
-      // console.log(newpop);
-      // if ((res.f1 + res.f2) / newpoll > 1.8) {
-      //   newpop += 1;
-      //   console.log("lack of food population decrease");
-      // }
 
       if ((freshFactCount["p1"] + freshFactCount["p2"]*1.0) / newpop  <= 0.2) {
         newhapp -= 1;
         // console.log("parks to population increase");
+      }
+
+      if (newhapp < 0) {
+        newpop = newpop - 1;
       }
 
       Cities.update({"_id": city._id}, {$set: {"res": res, "poll": newpoll, "happiness": newhapp, "population": newpop}});
