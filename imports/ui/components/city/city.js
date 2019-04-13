@@ -2,6 +2,8 @@ import './city.html';
 import { Cities } from '/imports/api/links/links.js';
 import { Producers } from '/imports/api/links/links.js';
 import { Meteor } from 'meteor/meteor';
+import { FlowRouter } from 'meteor/kadira:flow-router';
+
 // import { NewRound } from '/imports/api/links/methods.js';
 
 Template.cities.onCreated(function helloOnCreated() {
@@ -29,7 +31,23 @@ Template.cities.helpers({
   // },
   allCities() {
     // console.log((Producers.find({})).toArray());
+    // console.log(FlowRouter.current().params.city)
     return Cities.find();
+  },
+
+  notCityView() {
+    cname = FlowRouter.current().params.city;
+    console.log(Cities.find({"name": cname}).fetch());
+    if (Cities.find({"name": cname}).fetch().length > 0) {
+      return false;
+    }
+    else {
+      return true;
+    }
+  },
+
+  citySet() {
+    return Cities.find({"name": cname});
   }
 });
 

@@ -15,9 +15,9 @@ FlowRouter.route('/', {
 });
 
 FlowRouter.route('/:city', {
-  name: 'App.home',
-  action() {
-    BlazeLayout.render('App_body', { main: 'App_home' });
+  // name: 'App.home',
+  action(params, queryParams) {
+    BlazeLayout.render('App_body', { main: 'App_home' , city: params.city});
   },
 });
 
