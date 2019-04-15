@@ -3,6 +3,7 @@ import { Cities } from '/imports/api/links/links.js';
 import { Producers } from '/imports/api/links/links.js';
 import { Meteor } from 'meteor/meteor';
 import { FlowRouter } from 'meteor/kadira:flow-router';
+import '/imports/ui/stylesheets/style.css';
 
 // import { NewRound } from '/imports/api/links/methods.js';
 
@@ -69,6 +70,40 @@ Template.city.helpers({
     console.log(this);
     return producerColors[this.kind];
     // return this;
+  },
+
+  pollArr() {
+    return new Array(this.poll).fill(0);
+  },
+
+  popArr() {
+    return new Array(this.population).fill(0);
+    console.log("population " + new Array(this.pop).fill(0));
+  },
+
+  happyArr() {
+    return new Array(this.happiness).fill(0);
+    console.log("happiness " + new Array(this.happiness).fill(0));
+  },
+
+  m1Arr() {
+    console.log("m1 " + new Array(this.res.m1).fill(0));
+    return new Array(this.res.m1).fill(0);
+  },
+
+  m2Arr() {
+    console.log("metal " + new Array(this.res.m2).fill(0));
+    return new Array(this.res.m2).fill(0);
+  },
+
+  f1Arr() {
+    console.log("food1 " + new Array(this.res.f1).fill(0));
+    return new Array(this.res.f1).fill(0);
+  },
+
+  f2Arr() {
+    console.log("food2 " + new Array(this.res.f2).fill(0));
+    return new Array(this.res.f2).fill(0);
   }
 });
 
@@ -82,6 +117,9 @@ Template.cityFactory.helpers({
         prodText += this.prodValues[r] + " " + r + "   ";
       }
     }
+    // prodArray = new Array(this.prodValues["poll"]).fill(0);
+    // console.log("test " + prodArray);
+    // prodText += " Pollution: " + prodArray;
     prodText += " Pollution: " + this.prodValues["poll"];
     // console.log(prodText);
 
@@ -104,3 +142,4 @@ Template.cityFactory.helpers({
     return costText;
   }
 });
+

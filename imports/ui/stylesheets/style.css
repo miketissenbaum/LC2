@@ -1,0 +1,78 @@
+.cityIcon {
+	max-height: 50px;
+	max-width: 50px;
+}
+.cityName {
+	font-size: 2em;
+	color: #c163ff;
+	font-weight: bold;
+	text-align:center;
+}
+#cityBox {
+	border: solid black;
+	padding: .5em;
+	border-radius: 25px;
+
+}
+.resourceLabel{
+	font-weight: bold;
+	font-size: 1em;
+}
+
+#resourceBox {
+	width: 100%;
+	overflow: hidden;
+}
+
+#metalResourceBox {
+	width: 100%;
+	overflow: hidden;
+}
+
+#foodResourceBox {
+	width: 100%;
+	overflow: hidden;
+}
+
+#scoresBox {
+	margin-top: 20px;
+	/*overflow: hidden;*/
+}
+
+#factoryBox {
+	margin-top: 10px;
+
+}
+
+#m1Items {
+	width: 49%;
+	/*border: solid red;*/
+	float: left;
+	min-height: 55px;
+	font-weight: bold;
+}
+
+#m2Items {
+	width: 49%;
+	/*border: solid red;*/
+	float:left;
+	min-height: 55px;
+	font-weight: bold;
+}
+
+#f1Items {
+	width: 49%;
+	/*border: solid red;*/
+	float:left;
+	min-height: 55px;
+	font-weight: bold;
+}
+
+#f2Items {
+	width: 49%;
+	/*border: solid red;*/
+	float:left;
+	min-height: 55px;
+	font-weight: bold;
+}
+

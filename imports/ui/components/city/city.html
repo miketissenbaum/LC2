@@ -31,20 +31,38 @@
 
 <template name="city">
   <!-- {{}} -->
-  Name: {{name}} <br />
-  m1: {{res.m1}}    m2: {{res.m2}} <br />
-  f1: {{res.f1}}    f2: {{res.f2}} <br />
-  pollution: {{poll}}    population: {{population}}  happiness: {{happiness}}<br />
+  <div id="cityBox">
+    <p class="cityName">{{name}} </p>
+    <section id=resourcesBox>
+      <section id="metalResourceBox">
+        <div id="m1Items"> m1: {{#each m1Arr}} <img class="cityIcon" src="../img/resources/gold-bars.png"> {{/each}}</div>  
+        <div id="m2Items">m2: {{#each m2Arr}} <img class="cityIcon" src=../img/resources/Metal_PNG.png> {{/each}} </div>
+      </section>
+      <section id=foodResourceBox>
+        <div id="f1Items">f1: {{#each f1Arr}} <img class="cityIcon" src=../img/resources/food.png> {{/each}} </div>   
+        <div id="f2Items">f2: {{#each f2Arr}} <img class="cityIcon" src=../img/resources/cotton.png> {{/each}} </div>
+      </section>
+    </section>
+    <section id="scoresBox">
+      <div id="pollutionCity">pollution: {{#each pollArr}} <img class="cityIcon" src=../img/outputs/pollution.png> {{/each}}</div>
 
-  <table cellpadding="10">
-    <tr>
-      {{#each cityFactories}}
-        <td bgcolor="{{producerColor}}">
-          {{> cityFactory}}
-        </td>
-      {{/each}}
-    </tr>
-  </table>
+      <div id="popCity">population: {{#each popArr}} <img class="cityIcon" src="../img/outputs/person.png"> {{/each}}  </div>
+
+      <div id="happinessCity">happiness: {{#each happyArr}} <img class="cityIcon" src="../img/outputs/happiness.png"> {{/each}}</div>
+    </section>
+    <section id="factoryBox">
+      <table cellpadding="10">
+        <tr> Factories </tr>
+        <tr>
+          {{#each cityFactories}}
+            <td bgcolor="{{producerColor}}">
+              {{> cityFactory}}
+            </td>
+          {{/each}}
+        </tr>
+      </table>
+    </section>
+  </div>
       
 </template>
 
