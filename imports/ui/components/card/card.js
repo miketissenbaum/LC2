@@ -47,6 +47,19 @@ Template.factoryList.helpers({
     console.log(this);
     return producerColors[this.kind];
     // return this;
+  },
+
+  factoryIcon() {
+    factoryIconSource = {
+      "p1": "../img/icons/park_med.png",
+      "p2": "../img/icons/park_med.png",
+      "m1": "../img/icons/factory_med.png",
+      "m2": "../img/icons/factory_med.png",
+      "f1": "../img/icons/farm_med.png",
+      "f1": "../img/icons/farm_med.png"
+    }
+    console.log(this);
+    return factoryIconSource[this.kind];
   }
 
 });
@@ -73,8 +86,20 @@ Template.factoryList.events({
 
 
 Template.factory.helpers({
+  OutputIcon() {
+    factoryOutputType = {
+      "m1": "../img/icons/gold_sml.png",
+      "f1": "../img/icons/food_sml.png",
+      "m2": "../img/icons/steel_sml.png",
+      "f2": "../img/icons/cotton_sml.png"
+    }
+    console.log(this);
+    return factoryOutputType[this.kind];
+  },
+
   CostInfo() {
-    costText = "This costs ";
+    costText = "";
+    costIcon = "";
     for (r in this.buyCost) {
       if (this.buyCost[r] != 0) {
         costText += this.buyCost[r] + " " + r + ", ";

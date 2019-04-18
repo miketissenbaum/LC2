@@ -108,7 +108,26 @@ Template.city.helpers({
 });
 
 Template.cityFactory.helpers({
-  productionValues() {
+  productionRes() {
+   retres = [];
+
+   // console.log(this.prodValues);
+   for (r in this.prodValues) {
+     if (r != "poll" && this.prodValues[r] != 0) {
+       // prodText += this.prodValues[r] + " " + r + "   ";
+       retres.push({"resName": r, "resVal": this.prodValues[r], "resValArr": new Array(this.prodValues[r]).fill(0)});
+     }
+   }
+   // prodText += " Pollution: " + this.prodValues["poll"];
+   // console.log(prodText);
+   console.log(retres);
+
+   return retres;
+
+   // return Producers.find({$and: [{"owned": true}, {"owner": this.name}]});
+ },
+
+ productionValues() {
     prodText = "";
 
     // console.log(this.prodValues);
@@ -117,9 +136,7 @@ Template.cityFactory.helpers({
         prodText += this.prodValues[r] + " " + r + "   ";
       }
     }
-    // prodArray = new Array(this.prodValues["poll"]).fill(0);
-    // console.log("test " + prodArray);
-    // prodText += " Pollution: " + prodArray;
+
     prodText += " Pollution: " + this.prodValues["poll"];
     // console.log(prodText);
 

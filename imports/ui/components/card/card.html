@@ -3,6 +3,7 @@
     <tr>
     	{{#each PublicFactories}}
         <td bgcolor="{{factoryColor}}">
+          <img class="factoryIcon" src="{{factoryIcon}}">
           {{> factory}}
         </td>
       {{/each}}
@@ -16,7 +17,7 @@
 
 <template name="factory">
 <!-- {{}} -->
-    {{kind}} - {{ProductionText}} <br />
+    {{ProductionText}} <br />
     <!-- You can buy it for 
     {{buyCost.m1}} of m1, {{buyCost.f1}} of f1, {{buyCost.m2}} of m2, {{buyCost.f2}} of f2,  -->
     {{CostInfo}} and produces {{prodValues.poll}} pollution.
