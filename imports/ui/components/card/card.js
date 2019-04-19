@@ -97,13 +97,18 @@ Template.factory.helpers({
   },
 
   CostInfo() {
-    var img = document.createElement("img");
     costText = "";
     for (r in this.buyCost) {
       if (this.buyCost[r] != 0) {
         costText += this.buyCost[r] + " " + r + ", ";
+        document.getElementById('itemCost').innerHTML = costText;
+        // console.log("banana" + ac);
+        var x = document.createElement("img");
+        x.src = "../img/icons/cotton_sml.png";
+        document.getElementById("itemCost").appendChild(x);
+        // src.appendChild(x);
+
       }
-      // console.log("banana" +factoryOutputType[this.kind]);
     }
     return costText;
   },
