@@ -4,6 +4,7 @@ import { Meteor } from 'meteor/meteor';
 import { Links } from '../links.js';
 import { Producers } from '../links.js';
 import { Cities } from '../links.js';
+import { Assets } from '../links.js';
 
 Meteor.publish('links.all', function () {
   return Links.find();
@@ -24,4 +25,8 @@ Meteor.publish('producers.all', function () {
 
 Meteor.publish('cities.all', function () {
 	return Cities.find();
+});
+
+Meteor.publish('assets.all', function () {
+  return Assets.find();
 });
