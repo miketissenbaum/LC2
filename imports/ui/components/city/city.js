@@ -67,7 +67,7 @@ Template.city.helpers({
       "f1": "#FFFF80",
       "f2": "#FFFF80"
     }
-    console.log(this);
+    // console.log(this);
     return producerColors[this.kind];
     // return this;
   },
@@ -78,31 +78,31 @@ Template.city.helpers({
 
   popArr() {
     return new Array(this.population).fill(0);
-    console.log("population " + new Array(this.pop).fill(0));
+    // console.log("population " + new Array(this.pop).fill(0));
   },
 
   happyArr() {
     return new Array(this.happiness).fill(0);
-    console.log("happiness " + new Array(this.happiness).fill(0));
+    // console.log("happiness " + new Array(this.happiness).fill(0));
   },
 
   m1Arr() {
-    console.log("m1 " + new Array(this.res.m1).fill(0));
+    // console.log("m1 " + new Array(this.res.m1).fill(0));
     return new Array(this.res.m1).fill(0);
   },
 
   m2Arr() {
-    console.log("metal " + new Array(this.res.m2).fill(0));
+    // console.log("metal " + new Array(this.res.m2).fill(0));
     return new Array(this.res.m2).fill(0);
   },
 
   f1Arr() {
-    console.log("food1 " + new Array(this.res.f1).fill(0));
+    // console.log("food1 " + new Array(this.res.f1).fill(0));
     return new Array(this.res.f1).fill(0);
   },
 
   f2Arr() {
-    console.log("food2 " + new Array(this.res.f2).fill(0));
+    // console.log("food2 " + new Array(this.res.f2).fill(0));
     return new Array(this.res.f2).fill(0);
   }
 });
