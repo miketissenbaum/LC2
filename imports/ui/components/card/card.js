@@ -44,7 +44,7 @@ Template.factoryList.helpers({
       "f1": "#FFFF80",
       "f2": "#FFFF80"
     }
-    console.log(this);
+    // console.log(this);
     return producerColors[this.kind];
     // return this;
   },
@@ -58,7 +58,7 @@ Template.factoryList.helpers({
       "f1": "../img/icons/farm_med.png",
       "f1": "../img/icons/farm_med.png"
     }
-    console.log(this);
+    // console.log(this);
     return factoryIconSource[this.kind];
   }
 
@@ -94,7 +94,6 @@ Template.factory.helpers({
       "f2": "../img/icons/cotton_sml.png"
     };
     console.log(this);
-    }
     return factoryOutputType[this.kind];
   },
 
@@ -112,6 +111,13 @@ Template.factory.helpers({
        costText += '<img class="resourceIcon" src="' + factoryOutputType[r] + '" />';
      }
    }
+   console.log(this.prodValues.poll);
+
+   if (this.prodValues.poll != 0) {
+     costText += ' and ' + this.prodValues.poll + '<img class="resourceIcon" src="../img/icons/pollution_sml.png" />';
+     console.log(costText);
+   }
+   // console.log(costText);
    return costText;
  },
 
@@ -125,6 +131,7 @@ Template.factory.helpers({
   //   }
   //   return costText;
   // },
+
   ProductionText () {
     prodText = "";
     for (r in this.prodValues) {
