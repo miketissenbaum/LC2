@@ -94,6 +94,7 @@ Template.factory.helpers({
       "f2": "../img/icons/cotton_sml.png"
     };
     console.log(this);
+    }
     return factoryOutputType[this.kind];
   },
 
@@ -124,7 +125,6 @@ Template.factory.helpers({
   //   }
   //   return costText;
   // },
-
   ProductionText () {
     prodText = "";
     for (r in this.prodValues) {
