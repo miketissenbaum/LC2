@@ -93,17 +93,17 @@ Template.factory.helpers({
       "m2": "../img/icons/steel_sml.png",
       "f2": "../img/icons/cotton_sml.png"
     }
-    console.log(this);
     return factoryOutputType[this.kind];
   },
 
   CostInfo() {
+    var img = document.createElement("img");
     costText = "";
-    costIcon = "";
     for (r in this.buyCost) {
       if (this.buyCost[r] != 0) {
         costText += this.buyCost[r] + " " + r + ", ";
       }
+      // console.log("banana" +factoryOutputType[this.kind]);
     }
     return costText;
   },
