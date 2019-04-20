@@ -1,5 +1,6 @@
 import './card.html';
 import { Producers } from '/imports/api/links/links.js';
+// import { Assets } from '/imports/api/links/links.js';
 import { Meteor } from 'meteor/meteor';
 import { NewRound } from '/imports/api/links/methods.js';
 import { BuyProducer } from '/imports/api/links/methods.js';
@@ -9,6 +10,7 @@ Template.factoryList.onCreated(function helloOnCreated() {
   this.city = new ReactiveVar("city1");
 
   Meteor.subscribe('producers.all');
+  // Meteor.subscribe('assets.all');
 
   
   //kind
@@ -97,29 +99,61 @@ Template.factory.helpers({
     return factoryOutputType[this.kind];
   },
 
-  CostInfo() {
+  CostInfo(costList, startText) {
+  // CostInfo() {
    costText = "";
    factoryOutputType = {
       "m1": "../img/icons/gold_sml.png",
       "f1": "../img/icons/food_sml.png",
       "m2": "../img/icons/steel_sml.png",
-      "f2": "../img/icons/cotton_sml.png"
+      "f2": "../img/icons/cotton_sml.png",
+      "poll": "../img/icons/pollution_sml.png"
     };
-   for (r in this.buyCost) {
-     if (this.buyCost[r] != 0) {
-       costText += this.buyCost[r] + " " + r + ", ";
+   for (r in costList) {
+     // console.log(r + " " + factoryOutputType[r]);
+     if (costList[r] != 0 && costList[r] != undefined) {
+       // costText += costList[r] + " " + r + ", ";
+
+       costText += costList[r];
        costText += '<img class="resourceIcon" src="' + factoryOutputType[r] + '" />';
      }
    }
-   console.log(this.prodValues.poll);
+   // console.log(this);
 
-   if (this.prodValues.poll != 0) {
-     costText += ' and ' + this.prodValues.poll + '<img class="resourceIcon" src="../img/icons/pollution_sml.png" />';
-     console.log(costText);
-   }
+   // if (costList.poll != 0 || costList.poll != undefined) {
+   //   costText += ' and ' + costList.poll + '<img class="resourceIcon" src="../img/icons/pollution_sml.png" />';
+   //   // console.log(costText);
+   // }
    // console.log(costText);
+   if (costText != "") {
+     costText = startText + "<br />" + costText;
+   }
    return costText;
  },
+
+ // ProdInfo() {
+ //   costText = "";
+ //   factoryOutputType = {
+ //      "m1": "../img/icons/gold_sml.png",
+ //      "f1": "../img/icons/food_sml.png",
+ //      "m2": "../img/icons/steel_sml.png",
+ //      "f2": "../img/icons/cotton_sml.png"
+ //    };
+ //   for (r in this.prodCosts) {
+ //     if (this.prodCosts[r] != 0) {
+ //       costText += this.prodCosts[r] + " " + r + ", ";
+ //       costText += '<img class="resourceIcon" src="' + factoryOutputType[r] + '" />';
+ //     }
+ //   }
+ //   console.log(this);
+
+ //   if (this.prodCosts.poll != 0) {
+ //     costText += ' and ' + this.prodValues.poll + '<img class="resourceIcon" src="../img/icons/pollution_sml.png" />';
+ //     // console.log(costText);
+ //   }
+ //   // console.log(costText);
+ //   return costText;
+ // },
 
   // CostInfo() {
   //   costText = "";
