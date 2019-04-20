@@ -26,3 +26,6 @@ johanbrook:publication-collector  # Test a Meteor publication by collecting its 
 mdg:validated-method
 mdg:validation-error
 twbs:bootstrap
+accounts-ui
+accounts-password
+useraccounts:bootstrap

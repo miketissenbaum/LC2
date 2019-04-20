@@ -128,6 +128,9 @@ Template.factory.helpers({
    if (costText != "") {
      costText = startText + "<br />" + costText;
    }
+   else {
+     costText = "<br /> ";
+   }
    return costText;
  },
 
