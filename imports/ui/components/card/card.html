@@ -2,9 +2,11 @@
   <table cellpadding="10">
     <tr>
     	{{#each PublicFactories}}
-        <td bgcolor="{{factoryColor}}">
-          <img class="factoryIcon" src="{{factoryIcon}}">
-          {{> factory}}
+        <td bgcolor="{{factoryColor}}" class="factoryCards">
+          <div class="factoryInfo">
+            <img class="factoryIcon" src="{{factoryIcon}}">
+            {{> factory}}
+          </div>
         </td>
       {{/each}}
     </tr>
@@ -20,11 +22,17 @@
     <!-- {{ProductionText}} <br /> -->
     <!-- You can buy it for 
     {{buyCost.m1}} of m1, {{buyCost.f1}} of f1, {{buyCost.m2}} of m2, {{buyCost.f2}} of f2,  -->
-    <br />
-    {{{CostInfo this.prodValues "Produces every turn: "}}} 
+    <!-- <br /> -->
+    <div id="productionValues">
+      <span class="productionLabel">Produces</span>
+      {{{CostInfo this.prodValues ""}}} 
+    </div>
     <!-- and produces {{prodValues.poll}} pollution. -->
     <br />
-    {{{CostInfo this.prodCosts "Consumes every turn: "}}}
+    <div id="consuptionValue">
+      <span class="productionLabel">Consumes</span>
+    {{{CostInfo this.prodCosts ""}}}
+    </div>
 
     <!-- {{}} -->
     
