@@ -129,7 +129,7 @@ Template.factory.helpers({
      costText = startText + "<br />" + costText;
    }
    else {
-     costText = "<br /> ";
+     costText = '<br/> <img class="resourceIcon" src="../img/icons/blank.png" </br>';
    }
    return costText;
  },
