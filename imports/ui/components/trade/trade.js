@@ -37,13 +37,6 @@ Template.trade.events({
     }
     // console.log(event.target["to-city"].value);
     
-  },
-
-  'click .reset' (event, instance) {
-    ResetAll.call({}, (err, res) => {
-      if (err) {console.log(err);}
-    });
   }
-
   
 });

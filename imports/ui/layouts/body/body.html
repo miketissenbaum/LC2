@@ -1,3 +1,11 @@
 <template name="App_body">
-  {{> Template.dynamic template=main}}
+  <!-- <div class="header">
+    body nonsense
+  </div> -->
+  {{#if currentUser}}
+    {{> navBar}}
+  {{/if}}
+  <div class="content">
+    {{> Template.dynamic template=main}}
+  </div>
 </template>

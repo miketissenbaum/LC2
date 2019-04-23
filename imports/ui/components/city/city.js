@@ -38,7 +38,7 @@ Template.cities.helpers({
 
   notCityView() {
     cname = FlowRouter.current().params.city;
-    console.log(Cities.find({"name": cname}).fetch());
+    // console.log(Cities.find({"name": cname}).fetch());
     if (Cities.find({"name": cname}).fetch().length > 0) {
       return false;
     }
@@ -120,7 +120,7 @@ Template.cityFactory.helpers({
    }
    // prodText += " Pollution: " + this.prodValues["poll"];
    // console.log(prodText);
-   console.log(retres);
+   // console.log(retres);
 
    return retres;
 
@@ -147,14 +147,14 @@ Template.cityFactory.helpers({
   
   productionCosts() {
     costText = "";
-    console.log(this.prodCosts);
+    // console.log(this.prodCosts);
     for (r in this.prodCosts) {
       if (this.prodCosts[r] != 0) {
         costText += this.prodCosts[r] + " " + r + "   ";
       }
     }
     // prodText += " Pollution: " + this.prodValues["poll"];
-    console.log(costText);
+    // console.log(costText);
 
     return costText;
   }

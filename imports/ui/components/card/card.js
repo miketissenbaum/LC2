@@ -9,7 +9,7 @@ Template.factoryList.onCreated(function helloOnCreated() {
   // counter starts at 0
   this.city = new ReactiveVar("city1");
 
-  Meteor.subscribe('producers.all');
+  Meteor.subscribe('producers.public');
   // Meteor.subscribe('assets.all');
 
   
@@ -30,7 +30,7 @@ Template.factoryList.helpers({
   // },
   PublicFactories() {
     // console.log((Producers.find({})).toArray());
-    return Producers.find({$and: [{"owned": false}, {"visible": true}]});
+    return Producers.find({$and: [{"gameCode": FlowRouter.getParam("gameCode")}]});
   },
 
   CurrentCity() {
@@ -67,14 +67,6 @@ Template.factoryList.helpers({
 });
 
 Template.factoryList.events({
-  'click .newRound'(event, instance) {
-    // increment the counter when button is clicked
-    // instance.counter.set(instance.counter.get() + 1);
-    NewRound.call({}, (err, res) => {
-      if (err) {console.log(err);}
-    })
-  },
-
   'click .toggleCity' (event, instance) {
     if (instance.city.get() == "city1") {
       instance.city.set("city2");

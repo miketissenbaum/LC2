@@ -2,11 +2,18 @@
 
 import { Meteor } from 'meteor/meteor';
 import { check } from 'meteor/check';
+
+import { Assets } from './links.js';
+
 import { Links } from './links.js';
+import { Games } from './links.js';
+
 import { Producers } from './links.js';
 import { Cities } from './links.js';
 import { History } from './links.js';
 import { ValidatedMethod } from 'meteor/mdg:validated-method';
+
+import { baseUsers } from '../../startup/both/index.js';
 
 Meteor.methods({
   'links.insert'(title, url) {
@@ -262,9 +269,124 @@ export const ResetAll = new ValidatedMethod({
     Cities.update({"name": "city1"}, {$set: {"name": "city1", "factoryCount": factCount, "res": {"m1": 2, "m2": 2, "f1": 2, "f2": 2}, "poll": 0, "population": 5, "happiness": 5}}, {upsert: true})
     Cities.update({"name": "city2"}, {$set: {"name": "city2", "factoryCount": factCount, "res": {"m1": 2, "m2": 2, "f1": 2, "f2": 2}, "poll": 0, "population": 5, "happiness": 5}}, {upsert: true})
     Producers.remove({});
+    
+    Assets.update({$and: [{"name": "m1"}, {"kind": "producer"}]}, {$set: {"name": "m1", "regName": "Steel Factory", "img": "img/buildings/factory1.png", "kind": "producer"}}, {upsert: true});
+    Assets.update({$and: [{"name": "m2"}, {"kind": "producer"}]}, {$set: {"name": "m2", "regName": "Gold Factory", "img": "img/buildings/factory2.png", "kind": "producer"}}, {upsert: true});
+    Assets.update({$and: [{"name": "f1"}, {"kind": "producer"}]}, {$set: {"name": "f1", "regName": "Food Crop", "img": "img/buildings/farm1.png", "kind": "producer"}}, {upsert: true});
+    Assets.update({$and: [{"name": "f2"}, {"kind": "producer"}]}, {$set: {"name": "f2", "regName": "Cotton Farm", "img": "img/buildings/farm2.png", "kind": "producer"}}, {upsert: true});
+    Assets.update({$and: [{"name": "p1"}, {"kind": "producer"}]}, {$set: {"name": "p1", "regName": "Park", "img": "img/buildings/park1.png", "kind": "producer"}}, {upsert: true});
+    Assets.update({$and: [{"name": "p2"}, {"kind": "producer"}]}, {$set: {"name": "p2", "regName": "Fountain", "img": "img/buildings/park2.png", "kind": "producer"}}, {upsert: true});
+
+    Assets.update({$and: [{"name": "m1"}, {"kind": "resource"}]}, {$set: {"name": "m1", "regName": "Steel", "img": "img/icons/steel_med.png", "kind": "resource"}}, {upsert: true});
+    Assets.update({$and: [{"name": "m2"}, {"kind": "resource"}]}, {$set: {"name": "m2", "regName": "Gold", "img": "img/icons/gold_med.png", "kind": "resource"}}, {upsert: true});
+    Assets.update({$and: [{"name": "f1"}, {"kind": "resource"}]}, {$set: {"name": "f1", "regName": "Food", "img": "img/icons/food_med.png", "kind": "resource"}}, {upsert: true});
+    Assets.update({$and: [{"name": "f2"}, {"kind": "resource"}]}, {$set: {"name": "f2", "regName": "Cotton", "img": "img/icons/cotton_med.png", "kind": "resource"}}, {upsert: true});
   }
 });
 
+export const StartGame = new ValidatedMethod({
+  name: 'game.start',
+  validate({}) {},
+  run({cityCount, adminId, adminUsername}) {
+    if (!this.isSimulation) {
+      baseList = shuffle(baseUsers);
+      gameCodes = Games.find({}, {fields: {"gameCode": 1}}).fetch();
+      console.log(gameCodes);
+      // console.log(baseList);
+      newgc = generate_random_string(4);
+      while (newgc in gameCodes) {
+        newgc = generate_random_string(4);
+      }
+
+      Games.insert({
+        "gameCode": newgc, 
+        "playerName": adminUsername, 
+        "playerId": adminId,
+        "role": "admin",
+        "status": "running",
+        "group": "none",
+        "groupList":  baseList.slice(0,cityCount)
+      });
+      for (var i = 0; i < cityCount; i++) {
+        // console.log(baseList[i]);
+        console.log(Meteor.users.find({}).fetch());
+        JoinGame.call({"playerName": baseList[i], "playerId": Meteor.users.findOne({"profile.name": baseList[i]})._id, "gameCode": newgc, "role": "base"}, (err, res) => {
+          if (err) {
+            console.log(err);
+            return err;
+          }
+          else {
+            return res;
+          }
+        });
+      }
+    }
+  }
+});
+
+shuffle = function(v){
+  for(var j, x, i = v.length; i; j = parseInt(Math.random() * i), x = v[--i], v[i] = v[j], v[j] = x);
+  return v;
+};
+
+generate_random_string = function(string_length){
+    let random_string = '';
+    let random_ascii;
+    for(let i = 0; i < string_length; i++) {
+        random_ascii = Math.floor((Math.random() * 25) + 97);
+        random_string += String.fromCharCode(random_ascii);
+    }
+    return random_string;
+}
+
+// console.log(generate_random_string(5))
+
+
+export const JoinGame = new ValidatedMethod({
+  name: 'game.join',
+  validate({}) {},
+  run({playerName, playerId, gameCode, role}) {
+    if (!this.isSimulation) {
+      gameAdmin = Games.findOne({$and: [{"gameCode": gameCode}, {"role": "admin"}]});
+      console.log(gameAdmin);
+
+      if (gameAdmin != undefined) {
+
+        var group = playerName;
+        if (role == "player"){
+          //see which city has fewer players, and add to one of those cities.
+          //re assign group in here.
+          
+          groupSizes = gameAdmin.groupList.map(function(gi) {  //gi = group index
+            return {"groupIndex": gi, "groupSize": Games.find({$and: [{"gameCode": gameCode}, {"group": gi}]}).fetch().length};
+          });
+          sortedGroups = groupSizes.sort(function (a, b) {
+            return (a.groupSize - b.groupSize);
+          });
+          grp = sortedGroups[0].groupIndex;
+          console.log("group is " + grp);
+          group = grp;  
+        }
+        Games.update({
+          "gameCode": gameCode, 
+          "playerId": playerId
+        },{$set:{
+          "gameCode": gameCode, 
+          "playerName": playerName, 
+          "playerId": playerId,
+          "role": role,
+          "status": "running",
+          "group": group
+        }}, {upsert: true});
+
+      }
+      else {
+        throw new Error("game code doesn't exist");
+      } 
+      // if()
+    }
+  }
+});
 /*
 function ConsumeResources() {
   // for each owned Producers, update 
