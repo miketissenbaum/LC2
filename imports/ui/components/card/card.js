@@ -70,9 +70,10 @@ Template.factoryList.helpers({
       "m1": "../img/icons/factory_med.png",
       "m2": "../img/icons/factory_med.png",
       "f1": "../img/icons/farm_med.png",
-      "f1": "../img/icons/farm_med.png"
+      "f2": "../img/icons/farm_med.png"
     }
     // console.log(this);
+    // console.log(factoryIconSource[this.kind]);
     return factoryIconSource[this.kind];
   }
 
@@ -113,7 +114,7 @@ Template.factory.helpers({
       "f1": "../img/icons/food_sml.png",
       "m2": "../img/icons/steel_sml.png",
       "f2": "../img/icons/cotton_sml.png",
-      "poll": "../img/icons/pollution_sml.png"
+      "pollution": "../img/icons/pollution_sml.png"
     };
    for (r in costList) {
      // console.log(r + " " + factoryOutputType[r]);
@@ -182,7 +183,7 @@ Template.factory.helpers({
         prodText = this.prodValues[r] + " " + r + "   ";
       }
     }
-    // console.log(prodText);
+    console.log(prodText);
     return prodText;
   }
 });
