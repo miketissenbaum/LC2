@@ -5,7 +5,7 @@ import { Links } from '../../api/links/links.js';
 import { baseUsers } from '../both/index.js';
 
 basePass = "battery-honey-possible";
-export const cityStart = {"res": {"m1": 2, "m2": 2, "f1": 2, "f2": 2}, "poll": 0, "population": 5, "happiness": 5};
+export const cityStart = {"res": {"m1": 2, "m2": 2, "f1": 2, "f2": 2}, "pollution": 0, "population": 5, "happiness": 5};
 
 Meteor.startup(() => {
   // if the Links collection is empty

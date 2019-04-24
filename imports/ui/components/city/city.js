@@ -77,7 +77,7 @@ Template.city.helpers({
   },
 
   pollArr() {
-    return new Array(this.poll).fill(0);
+    return new Array(this.pollution).fill(0);
   },
 
   popArr() {
@@ -117,7 +117,7 @@ Template.cityFactory.helpers({
 
    // console.log(this.prodValues);
    for (r in this.prodValues) {
-     if (r != "poll" && this.prodValues[r] != 0) {
+     if (r != "pollution" && this.prodValues[r] != 0) {
        // prodText += this.prodValues[r] + " " + r + "   ";
        retres.push({"resName": r, "resVal": this.prodValues[r], "resValArr": new Array(this.prodValues[r]).fill(0)});
      }
@@ -136,12 +136,12 @@ Template.cityFactory.helpers({
 
     // console.log(this.prodValues);
     for (r in this.prodValues) {
-      if (r != "poll" && this.prodValues[r] != 0) {
+      if (r != "pollution" && this.prodValues[r] != 0) {
         prodText += this.prodValues[r] + " " + r + "   ";
       }
     }
 
-    prodText += " Pollution: " + this.prodValues["poll"];
+    prodText += " Pollution: " + this.prodValues["pollution"];
     // console.log(prodText);
 
     return prodText;
