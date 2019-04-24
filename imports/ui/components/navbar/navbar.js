@@ -15,7 +15,7 @@ Template.navBar.helpers({
    // logOut
    groupInfo () {
      gameCode = FlowRouter.getParam("gameCode");
-     console.log(gameCode);
+     // console.log(gameCode);
      group = "";
      if (gameCode != undefined){
        game = Games.findOne({$and: [{"playerId": Meteor.userId()}, {"gameCode": gameCode}]});
@@ -30,7 +30,7 @@ Template.navBar.helpers({
    },
 
    gameCode () {
-     console.log(FlowRouter.getParam("gameCode"));
+     // console.log(FlowRouter.getParam("gameCode"));
      return FlowRouter.getParam("gameCode");
    }
 });

@@ -32,7 +32,7 @@ Meteor.methods({
 export const RandomProducer = new ValidatedMethod({
   name: 'producers.makeRandom',
   validate ({}) {},
-  run({chosenType}) {
+  run({chosenType, gameCode}) {
     // const todo = Todos.findOne(todoId);
     chosenType = Math.floor(Math.random()*6);
     if (!this.isSimulation) {
@@ -70,6 +70,7 @@ export const RandomProducer = new ValidatedMethod({
           "buyCost": buyCosts[kindChosen],
           "prodValues": prodValues[kindChosen],
           "prodCosts": prodCosts[kindChosen],
+          "gameCode": gameCode,
           "owned": false,
           "visible": true,
           "owner": 0,
@@ -204,17 +205,17 @@ export const ConsumeResources = new ValidatedMethod({
 export const NewRound = new ValidatedMethod({
   name: 'newRound',
   validate ({}) {},
-  run({}) {
+  run({gameCode}) {
     ConsumeResources.call({}, (err, res) => {
       if (err) {console.log(err);}
     });
 
-    FlushProducers.call({}, (err, res) => {
+    FlushProducers.call({"gameCode": gameCode}, (err, res) => {
       if (err) {console.log(err);}
     });
 
     for (var i = 0; i < 6; i++) { 
-      RandomProducer.call({"chosenType": i}, (err, res) => {
+      RandomProducer.call({"chosenType": i, "gameCode": gameCode}, (err, res) => {
         if (err) {console.log(err);}
       });
     }
@@ -225,8 +226,8 @@ export const NewRound = new ValidatedMethod({
 export const FlushProducers = new ValidatedMethod({
   name: 'producers.flush',
   validate ({}) {},
-  run ({}){
-    Producers.update({$and: [{"owned": false, "visible": true}]}, {$set: {"visible": false}}, {multi: true});
+  run ({gameCode}){
+    Producers.update({$and: [{"owned": false, "visible": true, "gameCode": gameCode}]}, {$set: {"visible": false}}, {multi: true});
     console.log("producers flushed");
   }
 });
@@ -264,23 +265,24 @@ export const TradeResources = new ValidatedMethod({
 export const ResetAll = new ValidatedMethod({
   name: 'setup.all',
   validate({}) {},
-  run({}) {
+  run({gameCode}) {
     factCount = {"m1": 0, "m2": 0, "f1": 0, "f2": 0, "p1": 0, "p2": 0};
-    Cities.update({"name": "city1"}, {$set: {"name": "city1", "factoryCount": factCount, "res": {"m1": 2, "m2": 2, "f1": 2, "f2": 2}, "poll": 0, "population": 5, "happiness": 5}}, {upsert: true})
-    Cities.update({"name": "city2"}, {$set: {"name": "city2", "factoryCount": factCount, "res": {"m1": 2, "m2": 2, "f1": 2, "f2": 2}, "poll": 0, "population": 5, "happiness": 5}}, {upsert: true})
+
+    Games.update({$and: [{"gameCode": gameCode}, {"role": "base"}]}, {$set: {"factoryCount": factCount, "res": {"m1": 2, "m2": 2, "f1": 2, "f2": 2}, "poll": 0, "population": 5, "happiness": 5}}, {multi: true, upsert: true});
+    // Cities.update({"name": "city2"}, {$set: {"name": "city2", "factoryCount": factCount, "res": {"m1": 2, "m2": 2, "f1": 2, "f2": 2}, "poll": 0, "population": 5, "happiness": 5}}, {upsert: true})
     Producers.remove({});
     
-    Assets.update({$and: [{"name": "m1"}, {"kind": "producer"}]}, {$set: {"name": "m1", "regName": "Steel Factory", "img": "img/buildings/factory1.png", "kind": "producer"}}, {upsert: true});
-    Assets.update({$and: [{"name": "m2"}, {"kind": "producer"}]}, {$set: {"name": "m2", "regName": "Gold Factory", "img": "img/buildings/factory2.png", "kind": "producer"}}, {upsert: true});
-    Assets.update({$and: [{"name": "f1"}, {"kind": "producer"}]}, {$set: {"name": "f1", "regName": "Food Crop", "img": "img/buildings/farm1.png", "kind": "producer"}}, {upsert: true});
-    Assets.update({$and: [{"name": "f2"}, {"kind": "producer"}]}, {$set: {"name": "f2", "regName": "Cotton Farm", "img": "img/buildings/farm2.png", "kind": "producer"}}, {upsert: true});
-    Assets.update({$and: [{"name": "p1"}, {"kind": "producer"}]}, {$set: {"name": "p1", "regName": "Park", "img": "img/buildings/park1.png", "kind": "producer"}}, {upsert: true});
-    Assets.update({$and: [{"name": "p2"}, {"kind": "producer"}]}, {$set: {"name": "p2", "regName": "Fountain", "img": "img/buildings/park2.png", "kind": "producer"}}, {upsert: true});
+    // Assets.update({$and: [{"name": "m1"}, {"kind": "producer"}]}, {$set: {"name": "m1", "regName": "Steel Factory", "img": "img/buildings/factory1.png", "kind": "producer"}}, {upsert: true});
+    // Assets.update({$and: [{"name": "m2"}, {"kind": "producer"}]}, {$set: {"name": "m2", "regName": "Gold Factory", "img": "img/buildings/factory2.png", "kind": "producer"}}, {upsert: true});
+    // Assets.update({$and: [{"name": "f1"}, {"kind": "producer"}]}, {$set: {"name": "f1", "regName": "Food Crop", "img": "img/buildings/farm1.png", "kind": "producer"}}, {upsert: true});
+    // Assets.update({$and: [{"name": "f2"}, {"kind": "producer"}]}, {$set: {"name": "f2", "regName": "Cotton Farm", "img": "img/buildings/farm2.png", "kind": "producer"}}, {upsert: true});
+    // Assets.update({$and: [{"name": "p1"}, {"kind": "producer"}]}, {$set: {"name": "p1", "regName": "Park", "img": "img/buildings/park1.png", "kind": "producer"}}, {upsert: true});
+    // Assets.update({$and: [{"name": "p2"}, {"kind": "producer"}]}, {$set: {"name": "p2", "regName": "Fountain", "img": "img/buildings/park2.png", "kind": "producer"}}, {upsert: true});
 
-    Assets.update({$and: [{"name": "m1"}, {"kind": "resource"}]}, {$set: {"name": "m1", "regName": "Steel", "img": "img/icons/steel_med.png", "kind": "resource"}}, {upsert: true});
-    Assets.update({$and: [{"name": "m2"}, {"kind": "resource"}]}, {$set: {"name": "m2", "regName": "Gold", "img": "img/icons/gold_med.png", "kind": "resource"}}, {upsert: true});
-    Assets.update({$and: [{"name": "f1"}, {"kind": "resource"}]}, {$set: {"name": "f1", "regName": "Food", "img": "img/icons/food_med.png", "kind": "resource"}}, {upsert: true});
-    Assets.update({$and: [{"name": "f2"}, {"kind": "resource"}]}, {$set: {"name": "f2", "regName": "Cotton", "img": "img/icons/cotton_med.png", "kind": "resource"}}, {upsert: true});
+    // Assets.update({$and: [{"name": "m1"}, {"kind": "resource"}]}, {$set: {"name": "m1", "regName": "Steel", "img": "img/icons/steel_med.png", "kind": "resource"}}, {upsert: true});
+    // Assets.update({$and: [{"name": "m2"}, {"kind": "resource"}]}, {$set: {"name": "m2", "regName": "Gold", "img": "img/icons/gold_med.png", "kind": "resource"}}, {upsert: true});
+    // Assets.update({$and: [{"name": "f1"}, {"kind": "resource"}]}, {$set: {"name": "f1", "regName": "Food", "img": "img/icons/food_med.png", "kind": "resource"}}, {upsert: true});
+    // Assets.update({$and: [{"name": "f2"}, {"kind": "resource"}]}, {$set: {"name": "f2", "regName": "Cotton", "img": "img/icons/cotton_med.png", "kind": "resource"}}, {upsert: true});
   }
 });
 
@@ -290,9 +292,12 @@ export const StartGame = new ValidatedMethod({
   run({cityCount, adminId, adminUsername}) {
     if (!this.isSimulation) {
       baseList = shuffle(baseUsers);
-      gameCodes = Games.find({}, {fields: {"gameCode": 1}}).fetch();
-      console.log(gameCodes);
+      allGames = Games.find({}, {"gameCode": 1}).fetch();
+      
+      gameCodes = [];
+      allGames.forEach(function (game) {gameCodes.push(game.gameCode);});
       // console.log(baseList);
+      console.log(gameCodes);
       newgc = generate_random_string(4);
       while (newgc in gameCodes) {
         newgc = generate_random_string(4);
@@ -376,7 +381,12 @@ export const JoinGame = new ValidatedMethod({
           "playerId": playerId,
           "role": role,
           "status": "running",
-          "group": group
+          "group": group,
+          // "factoryCount": factCount, 
+          "res": {"m1": 2, "m2": 2, "f1": 2, "f2": 2}, 
+          "pollution": 0, 
+          "population": 5, 
+          "happiness": 5
         }}, {upsert: true});
 
       }

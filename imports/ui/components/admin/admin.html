@@ -13,9 +13,12 @@
 
 
 <template name="adminGame">
-  <button class="newRound">Next Round</button>
+  {{#each allPlayers}}
+    {{this}} <br />
+  {{/each}}
+  <button btn btn-large class="newRound">Next Round</button>
   <br />
-  <button class="reset"> Reset everything </button>
+  <button btn btn-large class="reset"> Reset everything </button>
 </template>
 
 <!-- <template name="adminGames">

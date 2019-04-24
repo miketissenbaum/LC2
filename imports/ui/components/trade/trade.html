@@ -10,15 +10,15 @@
 
     To: <select id="to-city">
       {{#each city}}
-        <option value = {{name}}>{{name}}</option>
+        <option value = {{_id}}>{{playerName}}</option>
       {{/each}}
     </select>
 
-    From: <select id="from-city">
+<!--     From: <select id="from-city">
       {{#each city}}
         <option value = {{name}}>{{name}}</option>
       {{/each}}
-    </select>
+    </select> -->
     <input type="submit" value="trade"/>
   </form>
   <br />

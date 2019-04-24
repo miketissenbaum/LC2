@@ -22,7 +22,7 @@ Template.adminView.events({
     if (size == ""){
       size = 4;
     }
-    console.log(size);
+    // console.log(size);
     // cityCount, adminId, adminUsername
     StartGame.call({"adminId": Meteor.userId(), "adminUsername": Meteor.user().profile.name, "cityCount": size}, (err, res) => {
       if(err) {console.log(err);}
@@ -35,14 +35,16 @@ Template.adminGame.onCreated(function helloOnCreated() {
 });
 
 Template.adminGame.helpers({
-  gameList() {
-    return Games.find({});
-  } 
+  allPlayers() {
+    disgame = Games.findOne({"gameCode": FlowRouter.getParam("gameCode")})
+    // console.log( disgame.groupList);
+    return disgame.groupList;
+  }
 });
 
-Template.adminGame.helpers({
+Template.adminGame.events({
   'click .reset' (event, instance) {
-    ResetAll.call({}, (err, res) => {
+    ResetAll.call({"gameCode": FlowRouter.getParam("gameCode")}, (err, res) => {
       if (err) {console.log(err);}
     });
   },
@@ -50,7 +52,7 @@ Template.adminGame.helpers({
   'click .newRound'(event, instance) {
     // increment the counter when button is clicked
     // instance.counter.set(instance.counter.get() + 1);
-    NewRound.call({}, (err, res) => {
+    NewRound.call({"gameCode": FlowRouter.getParam("gameCode")}, (err, res) => {
       if (err) {console.log(err);}
     })
   },
