@@ -1,0 +1,39 @@
+<template name="makeGame">
+  <form class = "hostGame form form-inline" role = "form">
+    <div class="form-group">
+      <label for="groupSizeTextBox" class="control-label">Groups:</label>
+          <input type="number" placeholder="4" name="groups" class = "form-control" id = "groupSizeTextBox"/>
+    <input type="submit" value = "Host new game" class = "btn btn-default" /> 
+    <sub>(Please enter less than 8 and >=2 if you don't want all the things to break)</sub>
+    </div>
+  </form>
+
+  {{> gameList }}
+</template>
+
+
+<template name="adminGame">
+  {{#each allPlayers}}
+    {{this}} <br />
+  {{/each}}
+  <button btn btn-large class="newRound">Next Round</button>
+  <br />
+  <button btn btn-large class="reset"> Reset everything </button>
+</template>
+
+<!-- <template name="adminGames">
+  <div class="panel panel-default">
+    <div class="panel-heading">Play Games</div>
+    <ul class="list-group">
+
+      {{#each gameList}}
+        <a href="/games/{{gameCode}}">
+          <li class="list-group-item">
+            {{gameCode}}
+          </li>
+        </a>
+      {{/each}}
+    </ul>
+  </div>
+</template>
+ -->

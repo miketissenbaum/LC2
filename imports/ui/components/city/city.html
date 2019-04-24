@@ -1,19 +1,19 @@
 <template name="cities">
   <table cellpadding="10">
     <tr>
-      {{#if notCityView}}
+      <!-- {{#if notCityView}}
       	{{#each allCities}}
           <td width = 50%>
             {{> city}}
           </td>
         {{/each}}
-      {{else}}
+      {{else}} -->
         {{#each citySet}}
           <td width = 50%>
             {{> city}}
           </td>
         {{/each}}
-      {{/if}}
+      <!-- {{/if}} -->
     </tr>
   </table>
   
@@ -35,20 +35,20 @@
     <p class="cityName">{{name}} </p>
     <section id=resourcesBox>
       <section id="metalResourceBox">
-        <div id="m1Items"> m1: {{#each m1Arr}} <img class="cityIcon" src="../img/icons/gold_sml.png"> {{/each}}</div>  
-        <div id="m2Items">m2: {{#each m2Arr}} <img class="cityIcon" src="../img/icons/steel_sml.png"> {{/each}} </div>
+        <div id="m1Items"> m1: {{res.m1}} <img class="cityIcon" src="../img/icons/gold_sml.png"> </div>  
+        <div id="m2Items">m2: {{res.m2}} <img class="cityIcon" src="../img/icons/steel_sml.png">  </div>
       </section>
       <section id=foodResourceBox>
-        <div id="f1Items">f1: {{#each f1Arr}} <img class="cityIcon" src="../img/icons/food_sml.png"> {{/each}} </div>   
-        <div id="f2Items">f2: {{#each f2Arr}} <img class="cityIcon" src="../img/icons/cotton_sml.png"> {{/each}} </div>
+        <div id="f1Items">f1: {{res.f1}} <img class="cityIcon" src="../img/icons/food_sml.png">  </div>   
+        <div id="f2Items">f2: {{res.f2}} <img class="cityIcon" src="../img/icons/cotton_sml.png"> </div>
       </section>
     </section>
     <section id="scoresBox">
-      <div id="pollutionCity">pollution: {{#each pollArr}} <img class="cityIcon" src="../img/icons/pollution_med.png"> {{/each}}</div>
+      <div id="pollutionCity">pollution: {{pollution}} <img class="cityIcon" src="../img/icons/pollution_med.png"> </div>
 
-      <div id="popCity">population: {{#each popArr}} <img class="cityIcon" src="../img/icons/population_med.png"> {{/each}}  </div>
+      <div id="popCity">population: {{population}} <img class="cityIcon" src="../img/icons/population_med.png">   </div>
 
-      <div id="happinessCity">happiness: {{#each happyArr}} <img class="cityIcon" src="../img/icons/happiness_med.png"> {{/each}}</div>
+      <div id="happinessCity">happiness: {{happiness}} <img class="cityIcon" src="../img/icons/happiness_med.png"></div>
     </section>
     <section id="factoryBox">
       <table cellpadding="10">

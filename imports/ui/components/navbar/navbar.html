@@ -1,0 +1,40 @@
+<!-- <template name="navBar">
+  {{GroupInfo}}
+  <button class="btn btn-default navbar-btn logOut">Sign out</button>
+</template>
+ -->
+
+<template name ="navBar">
+  <nav class="navbar navbar-default">
+    <div class="container-fluid">
+      <!-- Brand and toggle get grouped for better mobile display -->
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="/">City Settlers</a>
+      </div>
+
+     <!-- Collect the nav links, forms, and other content for toggling -->
+      <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+        <ul class="nav navbar-nav">
+          {{#if currentUser}}
+          <!-- {{#if gameView}} -->
+              <!-- <li><a href="#">Year: {{gameYear}}</a></li> -->
+              <li><a href="#">Group: {{groupInfo}}</a></li>
+              <li><a href="#">Game: {{gameCode}}</a></li>
+
+          <!-- {{/if}} -->
+          <li><p class="nav navbar-text">Username: {{currentUser.profile.name}}</p></li>
+          <li><button class="btn btn-default navbar-btn logOut">Sign out</button></li>
+          {{/if}}
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+
+</template>

@@ -2,6 +2,10 @@
 
 import { Meteor } from 'meteor/meteor';
 import { Links } from '../../api/links/links.js';
+import { baseUsers } from '../both/index.js';
+
+basePass = "battery-honey-possible";
+export const cityStart = {"res": {"m1": 2, "m2": 2, "f1": 2, "f2": 2}, "poll": 0, "population": 5, "happiness": 5};
 
 Meteor.startup(() => {
   // if the Links collection is empty
@@ -31,4 +35,23 @@ Meteor.startup(() => {
 
     data.forEach(link => Links.insert(link));
   }
+
+  //setup base station users
+  // setupBaseUsers: function () {
+  if (Meteor.users.findOne({"username": baseUsers[0]}) == undefined) {
+    for (uname in baseUsers){
+      Accounts.createUser({
+        username: baseUsers[uname],
+        email : "base-" + baseUsers[uname] + "@bases.com",
+        password : basePass,
+        profile  : {
+            //publicly visible fields like firstname goes here
+            "name": baseUsers[uname],
+            "lastname": uname
+        }
+      });
+    }
+  }
+  // }
+
 });

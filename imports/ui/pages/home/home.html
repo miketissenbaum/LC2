@@ -1,17 +1,62 @@
 <template name="App_home">
-  <!-- {{> atForm}} -->
-  {{> factoryList}}
-  {{> cities}}
+
+
+  {{#unless currentUser}}
+    {{> atForm}}
+  {{/unless}}
+
+  {{#if currentUser}}
+    <!-- {{> navBar}} -->
+
+    {{#unless isAdmin}}
+      {{> gameStart}}
+    {{/unless}}
+
+    {{#if isAdmin}}
+      {{> adminView}}
+    {{/if}}
+    <!-- </div> -->
+  {{/if}}
+  <!-- {{> info}} -->
+</template>
+
+
+<template name="gameView">
+  {{#if currentUser}}
+
+    {{#if isRole "admin"}}
+      {{> adminGame}}
+    {{/if}}
+
+    {{#if isRole "player"}}
+      {{> playerGame}}
+    {{/if}}
+
+    {{#if isRole "base"}}
+      {{> baseGame}}
+    {{/if}}
+
+  {{/if}}
+</template>
+
+<template name="playerGame">
+  
   {{> trade}}
-  <!-- {{> info}} -->
+
 </template>
 
-<template name="App_city">
-  {{> atForm}}
+<template name="baseGame">
+
   {{> factoryList}}
 
-  <!-- {{> individualCities}} -->
-  <!-- {{> individualTrade}} -->
   {{> cities}}
-  <!-- {{> info}} -->
+
 </template>
+
+
+<template name="adminView">
+  is an admin
+  <!-- {{> }} -->
+  {{> makeGame}}
+</template>
+

@@ -1,6 +1,7 @@
 import './city.html';
 import { Cities } from '/imports/api/links/links.js';
 import { Producers } from '/imports/api/links/links.js';
+import { Games } from '/imports/api/links/links.js';
 import { Meteor } from 'meteor/meteor';
 import { FlowRouter } from 'meteor/kadira:flow-router';
 import '/imports/ui/stylesheets/style.css';
@@ -12,8 +13,9 @@ Template.cities.onCreated(function helloOnCreated() {
   this.counter = new ReactiveVar(0);
 
   Meteor.subscribe('cities.all');
-  Meteor.subscribe('producers.all');
-
+  Meteor.subscribe('producers.public');
+  Meteor.subscribe('producers.owned');
+  Meteor.subscribe('games.running');
   
   //kind
   //m1 cost, m2 cost, f1 cost, f2 cost, people cost
@@ -38,7 +40,7 @@ Template.cities.helpers({
 
   notCityView() {
     cname = FlowRouter.current().params.city;
-    console.log(Cities.find({"name": cname}).fetch());
+    // console.log(Cities.find({"name": cname}).fetch());
     if (Cities.find({"name": cname}).fetch().length > 0) {
       return false;
     }
@@ -48,14 +50,16 @@ Template.cities.helpers({
   },
 
   citySet() {
-    return Cities.find({"name": cname});
+    thisgame = [Games.findOne({$and: [{"playerId": Meteor.userId()}, {"gameCode": FlowRouter.getParam("gameCode")}, {"status": "running"}, {"role": "base"}]})];
+    // return Games.find({"name": cname});
+    return thisgame;
   }
 });
 
 Template.city.helpers({
   cityFactories() {
     // console.log(Producers.find({$and: [{"owned": true}, {"owner": this.name}]}).fetch());
-    return Producers.find({$and: [{"owned": true}, {"owner": this.name}]});
+    return Producers.find({$and: [{"gameCode": FlowRouter.getParam("gameCode")}, {"owned": true}, {"ownerId": Meteor.userId()}]});
   },
 
   producerColor() {
@@ -120,7 +124,7 @@ Template.cityFactory.helpers({
    }
    // prodText += " Pollution: " + this.prodValues["poll"];
    // console.log(prodText);
-   console.log(retres);
+   // console.log(retres);
 
    return retres;
 
@@ -147,14 +151,14 @@ Template.cityFactory.helpers({
   
   productionCosts() {
     costText = "";
-    console.log(this.prodCosts);
+    // console.log(this.prodCosts);
     for (r in this.prodCosts) {
       if (this.prodCosts[r] != 0) {
         costText += this.prodCosts[r] + " " + r + "   ";
       }
     }
     // prodText += " Pollution: " + this.prodValues["poll"];
-    console.log(costText);
+    // console.log(costText);
 
     return costText;
   }

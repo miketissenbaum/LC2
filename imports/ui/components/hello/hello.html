@@ -1,4 +1,32 @@
-<template name="hello">
-  <button>Click Me</button>
+<template name="gameStart">
+<!--   <button>Click Me</button>
   <p>You've pressed the button {{counter}} times.</p>
+ -->
+  <form class = "gameChoice form form-inline" role = "form">
+    <div class="form-group">
+        <label for="gameCodeTextBox" class="control-label">Game Code:</label>
+        <input placeholder="" name="gameCode" class = "form-control" id = "gameCodeTextBox"/>
+        <input type="submit" value = "Join a game" class = "btn btn-default"/>
+    </div>
+  </form>
+
+  <!-- Print list of available games with right links -->
+  {{> gameList}}
 </template>
+
+
+<!-- <template name="gameList">
+  <div class="panel panel-default">
+    <div class="panel-heading">Play Games</div>
+    <ul class="list-group">
+
+      {{#each userGames}}
+        <a href="/games/{{gameCode}}">
+          <li class="list-group-item">
+            {{gameCode}}
+          </li>
+        </a>
+      {{/each}}
+    </ul>
+  </div>
+</template> -->
