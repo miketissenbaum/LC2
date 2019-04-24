@@ -135,8 +135,13 @@ button {
 
 #marketHeader {
 	margin-top: 10px;
+ 	text-align: center;
 }
 
 body {
 	margin: 10px;
+}
+
+.marketType {
+	padding-left: 40px;
 }
