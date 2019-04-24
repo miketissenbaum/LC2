@@ -23,6 +23,8 @@
 #resourceBox {
 	width: 100%;
 	overflow: hidden;
+    font-size: 35px;
+
 }
 
 #metalResourceBox {
@@ -37,7 +39,9 @@
 
 #scoresBox {
 	margin-top: 20px;
-	/*overflow: hidden;*/
+	font-weight: bold;
+	font-size: 35px;
+	overflow: hidden;
 }
 
 #factoryBox {
@@ -109,10 +113,16 @@
 }
 
 .factoryCards {
-	width: 16%;
+	width: 20%;
     font-weight: bold;
 }
 
 button {
     font-weight: normal;
+}
+
+.cityMetric {
+	float:left;
+    margin-right: 15px;
+
 }
