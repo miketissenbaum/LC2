@@ -10,6 +10,7 @@ import { Games } from './links.js';
 
 import { Producers } from './links.js';
 import { Cities } from './links.js';
+import { Bids } from './links.js';
 import { History } from './links.js';
 import { ValidatedMethod } from 'meteor/mdg:validated-method';
 
@@ -28,11 +29,13 @@ Meteor.methods({
   },
 });
 
+var resources = ["m1", "m2", "f1", "f2"];
+var factoryKinds = ["m1", "m2", "f1", "f2", "p1", "p2"];
 
 export const RandomProducer = new ValidatedMethod({
   name: 'producers.makeRandom',
   validate ({}) {},
-  run({chosenType, gameCode}) {
+  run({chosenType, gameCode, bidKind}) {
     // const todo = Todos.findOne(todoId);
     chosenType = Math.floor(Math.random()*6);
     if (!this.isSimulation) {
@@ -44,13 +47,22 @@ export const RandomProducer = new ValidatedMethod({
           "p1": { "m1": 2, "f1": 0, "m2": 2, "f2": 0 },
           "p2": { "m1": 0, "f1": 2, "m2": 0, "f2": 2 },
         };
+        var bidKinds = {
+          "m1": "f1",
+          "m2": "f2",
+          "f1": "m2",
+          "f2": "m1",
+          "p1": "m1",
+          "p2": "f1"
+
+        }
         var prodValues = {
-          "m1": {"m1": 3, "poll": 2},
-          "m2": {"m2": 3, "poll": 2},
-          "f1": {"f1": 3, "poll": 1},
-          "f2": {"f2": 3, "poll": 1},
-          "p1": {"poll": -3},
-          "p2": {"poll": -2},
+          "m1": {"m1": 3, "pollution": 2},
+          "m2": {"m2": 3, "pollution": 2},
+          "f1": {"f1": 3, "pollution": 1},
+          "f2": {"f2": 3, "pollution": 1},
+          "p1": {"pollution": -3},
+          "p2": {"pollution": -2},
         };
         var prodCosts = {
           "m1": { "m1": 0, "f1": 1, "m2": 0, "f2": 0 },
@@ -68,6 +80,7 @@ export const RandomProducer = new ValidatedMethod({
         var currentProd = {
           "kind": kindChosen,
           "buyCost": buyCosts[kindChosen],
+          "bidKind": bidKind,
           "prodValues": prodValues[kindChosen],
           "prodCosts": prodCosts[kindChosen],
           "gameCode": gameCode,
@@ -132,7 +145,7 @@ export const ConsumeResources = new ValidatedMethod({
     // city = Cities.findOne({"name": prod["owner"]});
     Cities.find({}).forEach(function (city) {
       res = city.res;
-      newpoll = parseInt(city.poll) * 1.0;
+      newpoll = parseInt(city.pollution) * 1.0;
       newpop = parseInt(city.population);
       newhapp = parseInt(city.happiness);
       freshFactCount = {"m1": 0, "m2": 0, "f1": 0, "f2": 0, "p1": 0, "p2": 0};
@@ -155,7 +168,7 @@ export const ConsumeResources = new ValidatedMethod({
             res[r] -= prod.prodCosts[r];
           }
           for (r in prod.prodValues) {
-            if (r != "poll"){
+            if (r != "pollution"){
               res[r] += Math.round(prod.prodValues[r] * efficiency);
             }
             else {
@@ -195,29 +208,34 @@ export const ConsumeResources = new ValidatedMethod({
         newpop = newpop - 1;
       }
 
-      Cities.update({"_id": city._id}, {$set: {"res": res, "poll": newpoll, "happiness": newhapp, "population": newpop}});
-      History.insert({"time": new Date().getTime(), "city": city.name, "cityid": city._id, "res": res, "poll": newpoll, "happiness": newhapp, "population": newpop});
+      Cities.update({"_id": city._id}, {$set: {"res": res, "pollution": newpoll, "happiness": newhapp, "population": newpop}});
+      History.insert({"time": new Date().getTime(), "city": city.name, "cityid": city._id, "res": res, "pollution": newpoll, "happiness": newhapp, "population": newpop});
     });
-    
   }
 });
 
 export const NewRound = new ValidatedMethod({
   name: 'newRound',
   validate ({}) {},
-  run({gameCode}) {
+  run({gameCode, producerCount = 6}) {
     ConsumeResources.call({}, (err, res) => {
       if (err) {console.log(err);}
     });
 
-    FlushProducers.call({"gameCode": gameCode}, (err, res) => {
-      if (err) {console.log(err);}
-    });
-
-    for (var i = 0; i < 6; i++) { 
-      RandomProducer.call({"chosenType": i, "gameCode": gameCode}, (err, res) => {
-        if (err) {console.log(err);}
-      });
+    // FlushProducers.call({"gameCode": gameCode}, (err, res) => {
+    //   if (err) {console.log(err);}
+    // });
+    diffResources = shuffle(resources);
+    for (var i = 0; i < producerCount; i++) { 
+      //for each kind of resource 
+        //if there are not 4 factories available with that bidkind, add a factory
+      res = diffResources[(i % resources.length)];
+        if (Producers.find({$and: [{"bidKind": res}, {"gameCode": gameCode}, {"owned": false}, {"visible": true}]}).fetch().length < 4) {
+          RandomProducer.call({"chosenType": i, "gameCode": gameCode, "bidKind": res}, (err, res) => {
+            if (err) {console.log(err);}
+          });
+        // }
+      }
     }
     console.log("new round called");
   }
@@ -268,7 +286,7 @@ export const ResetAll = new ValidatedMethod({
   run({gameCode}) {
     factCount = {"m1": 0, "m2": 0, "f1": 0, "f2": 0, "p1": 0, "p2": 0};
 
-    Games.update({$and: [{"gameCode": gameCode}, {"role": "base"}]}, {$set: {"factoryCount": factCount, "res": {"m1": 2, "m2": 2, "f1": 2, "f2": 2}, "poll": 0, "population": 5, "happiness": 5}}, {multi: true, upsert: true});
+    Games.update({$and: [{"gameCode": gameCode}, {"role": "base"}]}, {$set: {"factoryCount": factCount, "res": {"m1": 2, "m2": 2, "f1": 2, "f2": 2}, "pollution": 0, "population": 5, "happiness": 5}}, {multi: true, upsert: true});
     // Cities.update({"name": "city2"}, {$set: {"name": "city2", "factoryCount": factCount, "res": {"m1": 2, "m2": 2, "f1": 2, "f2": 2}, "poll": 0, "population": 5, "happiness": 5}}, {upsert: true})
     Producers.remove({});
     

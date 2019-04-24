@@ -1,15 +1,18 @@
 <template name="factoryList">
   <table cellpadding="10">
-    <tr>
-    	{{#each PublicFactories}}
-        <td bgcolor="{{factoryColor}}" class="factoryCards">
-          <div class="factoryInfo">
-            <img class="factoryIcon" src="{{factoryIcon}}">
-            {{> factory}}
-          </div>
-        </td>
-      {{/each}}
-    </tr>
+    {{#each bidKinds}}
+      <tr>
+        <td width="200px"> <img src="{{ResourceIcon this}}" /> </td>
+      	{{#each PublicFactories this}}
+          <td bgcolor="{{factoryColor}}" class="factoryCards">
+            <div class="factoryInfo">
+              <img class="factoryIcon" src="{{factoryIcon}}">
+              {{> factory}}
+            </div>
+          </td>
+        {{/each}}
+      </tr>
+    {{/each}}
   </table>
   <!-- <button class="newRound">Next Round</button> -->
   <!-- <p>You've pressed the button {{counter}} times.</p> -->
@@ -37,5 +40,5 @@
     <!-- {{}} -->
     
     <br />
-    <!-- <button class="buy1">Buy city 1</button> <button class="buy2">Buy city 2</button> -->
+    <button class="bid" name="-1"> -1 </button> {{FactoryBid}} <button class="bid" name="+1"> +1</button>
 </template>

@@ -8,7 +8,7 @@ import { ResetAll } from '/imports/api/links/methods.js';
 Template.trade.onCreated(function helloOnCreated() {
   // counter starts at 0
   // this.counter = new ReactiveVar(0);
-  Meteor.subscribe('games.running');
+  Meteor.subscribe('games.all');
 });
 
 Template.trade.helpers({
@@ -17,8 +17,10 @@ Template.trade.helpers({
   },
   otherPlayers() {
     gCode = FlowRouter.getParam("gameCode");
-    thisGroup = Games.findOne({$and: [{"playerId": Meteor.userId()}, {"gameCode": gCode}]}).group;
-    return Games.find({$and: [{"gameCode": gCode}, {"role": "player"}, {$ne: {"group": group}}]});
+    thisGame = Games.findOne({$and: [{"playerId": Meteor.userId()}, {"gameCode": gCode}]});
+    thisGroup = thisGame.group;
+    // console.log(thisGame);
+    return Games.find({$and: [{"gameCode": gCode}, {"role": "player"}, {"group": {$ne: group}}]});
   },
 
 });

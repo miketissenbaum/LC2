@@ -28,13 +28,25 @@ Template.factoryList.helpers({
   // counter() {
   //   return Template.instance().counter.get();
   // },
-  PublicFactories() {
-    // console.log((Producers.find({})).toArray());
-    return Producers.find({$and: [{"gameCode": FlowRouter.getParam("gameCode")}]});
+  bidKinds() {
+    return ["f1", "f2", "m1", "m2"];
   },
 
-  CurrentCity() {
-    return Template.instance().city.get();
+  PublicFactories(bidKind) {
+    // console.log((Producers.find({})).toArray());
+    // console.log(bidKind);
+    return Producers.find({$and: [{"gameCode": FlowRouter.getParam("gameCode")}, {"owned": false}, {"visible": true}, {"bidKind": bidKind}]});
+  },
+
+  ResourceIcon(res) {
+    factoryOutputType = {
+      "m1": "../img/icons/gold_sml.png",
+      "f1": "../img/icons/food_sml.png",
+      "m2": "../img/icons/steel_sml.png",
+      "f2": "../img/icons/cotton_sml.png"
+    };
+    // console.log(res);
+    return factoryOutputType[res];
   },
 
   factoryColor() {
@@ -87,9 +99,11 @@ Template.factory.helpers({
       "m2": "../img/icons/steel_sml.png",
       "f2": "../img/icons/cotton_sml.png"
     };
-    console.log(this);
+    // console.log(this);
     return factoryOutputType[this.kind];
   },
+
+  
 
   CostInfo(costList, startText) {
   // CostInfo() {
@@ -188,5 +202,11 @@ Template.factory.events({
       if(err) {console.log(err);}
     });
     console.log(this._id);
+  },
+
+  'click .bid' (event, instance) {
+    event.preventDefault();
+    console.log(event.target.text);
+    console.log(event.target.name);
   }
 });

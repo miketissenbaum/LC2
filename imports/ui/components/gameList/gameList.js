@@ -14,9 +14,9 @@ Template.gameList.onCreated(function helloOnCreated() {
 
 Template.gameList.helpers({
   userGames() {
-    console.log(Meteor.userId());
-    console.log(Games.find({"playerId": Meteor.userId()}).fetch());
-    console.log(Games.find().fetch());
+    // console.log(Meteor.userId());
+    // console.log(Games.find({"playerId": Meteor.userId()}).fetch());
+    // console.log(Games.find().fetch());
     return Games.find({});
   },
 
