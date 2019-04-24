@@ -12,9 +12,14 @@
 #cityBox {
 	border: solid black;
 	padding: .5em;
-	border-radius: 25px;
-
+	border-radius: 0px;
+	margin-top: 15px;
 }
+
+#cityBox h3 {
+	margin-top: 10px;
+}
+
 .resourceLabel{
 	font-weight: bold;
 	font-size: 1em;
@@ -38,14 +43,14 @@
 }
 
 #scoresBox {
-	margin-top: 20px;
+	margin-top: 15px;
 	font-weight: bold;
 	font-size: 35px;
 	overflow: hidden;
 }
 
 #factoryBox {
-	margin-top: 10px;
+	margin-top: 15px;
 
 }
 
@@ -124,5 +129,12 @@ button {
 .cityMetric {
 	float:left;
     margin-right: 15px;
+}
 
+#marketHeader {
+	margin-top: 10px;
+}
+
+body {
+	margin: 10px;
 }
