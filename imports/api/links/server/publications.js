@@ -45,3 +45,10 @@ Meteor.publish('games.running', function () {
   // console.log(this.users());
   return Games.find({$and: [{"playerId": Meteor.userId()}, {"status": "running"}]});
 });
+
+Meteor.publish('games.all', function () {
+  // console.log(this.users());
+  return Games.find({$and: [{"status": "running"}]});
+});
+
+

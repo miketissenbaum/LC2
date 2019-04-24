@@ -33,11 +33,11 @@ Template.gameView.helpers({
   isRole(role) {
     gameCode = FlowRouter.current().params.gameCode;
     game = Games.findOne({$and: [{"gameCode": gameCode}, {"playerId": Meteor.userId()}]})
-    console.log(role);
+    // console.log(role);
     if (game != undefined){
       // console.log(game);
       if (game.role == role){
-        console.log(role + " confirmed");
+        // console.log(role + " confirmed");
         return true;  
       }
       else {
@@ -46,7 +46,7 @@ Template.gameView.helpers({
     }
     else {
       // return false;
-      console.log("game not found");
+      // console.log("game not found");
       FlowRouter.go('home');
       return false;
     }
