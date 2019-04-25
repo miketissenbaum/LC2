@@ -262,95 +262,118 @@ export const ConsumeResources = new ValidatedMethod({
 
   run ({gameCode}) {
     // city = Cities.findOne({"name": prod["owner"]});
-    admin = Games.findOne({$and: [{"gameCode": gameCode}, {"role": "admin"}]});
-    allBases = Games.find({$and: [{"gameCode": gameCode}, {"role": "base"}]}).fetch();
-    ResetFactoryNotes.call({gameCode});
+    if (!this.isSimulation){
+      admin = Games.findOne({$and: [{"gameCode": gameCode}, {"role": "admin"}]});
+      allBases = Games.find({$and: [{"gameCode": gameCode}, {"role": "base"}]}).fetch();
+      ResetFactoryNotes.call({gameCode});
 
-    for (b in allBases){
-      base = allBases[b];
-      res = base.res;
-      newpoll = parseInt(base.pollution) ;
-      newpop = parseInt(base.population);
-      newhapp = parseInt(base.happiness);
-      freshFactCount = {"m1": 0, "m2": 0, "f1": 0, "f2": 0, "p1": 0, "p2": 0};
-      // factCount = city.factoryCount;
-      parks = 0;
-      roundNotes = base.roundNotes;
-      // console.log("base " + base.playerId);
-      // console.log(Producers.find({"owned": true}).fetch());
-      allProds = Producers.find({$and: [{"gameCode": gameCode}, {"owned": true}, {"ownerId": base.playerId}]}).fetch()
-      affordableProds = [];
-      // console.log(allProds);
-      for (p in allProds){
-        prod = allProds[p];
-        affordable = true;
-        for (r in prod.prodCosts) {
-          if ((res[r] -  prod.prodCosts[r]) < 0) {
-            affordable = false;
-          }
+      for (b in allBases){
+        base = allBases[b];
+        res = base.res;
+        newpoll = parseInt(base.pollution);
+        newpop = parseInt(base.population);
+        newhapp = parseInt(base.happiness);
+        freshFactCount = {"m1": 0, "m2": 0, "f1": 0, "f2": 0, "p1": 0, "p2": 0};
+        // factCount = city.factoryCount;
+        parks = 0;
+        roundNotes = base.roundNotes;
+        if (roundNotes == undefined) {
+          roundNotes = [];
         }
-
-        console.log(affordable + " " + prod._id);
-        if (affordable == true) {
+        // console.log("base " + base.playerId);
+        // console.log(Producers.find({"owned": true}).fetch());
+        allProds = Producers.find({$and: [{"gameCode": gameCode}, {"owned": true}, {"ownerId": base.playerId}]}).fetch()
+        affordableProds = [];
+        // console.log(allProds);
+        for (p in allProds){
+          prod = allProds[p];
+          affordable = true;
           for (r in prod.prodCosts) {
-            res[r] -= prod.prodCosts[r];
-          }
-          for (r in prod.prodValues) {
-            if (r != "pollution"){
-              res[r] += Math.round(prod.prodValues[r]);
-            }
-            else {
-              newpoll = newpoll + prod.prodValues[r];
+            if ((res[r] -  prod.prodCosts[r]) < 0) {
+              affordable = false;
             }
           }
-          Producers.update({_id: prod._id}, {$set: {"roundNotes": ["Run successful!"], "roundRun": true}}, {multi: false});
+
+          // console.log(affordable + " " + prod._id);
+          if (affordable == true) {
+            for (r in prod.prodCosts) {
+              res[r] -= prod.prodCosts[r];
+            }
+            for (r in prod.prodValues) {
+              if (r != "pollution"){
+                res[r] += Math.round(prod.prodValues[r]);
+              }
+              else {
+                newpoll = newpoll + prod.prodValues[r];
+              }
+            }
+            Producers.update({_id: prod._id}, {$set: {"roundNotes": ["Run successful!"], "roundRun": true}}, {multi: false});
+          }
+          else {
+            dur = prod.durability + 1;
+            Producers.update({_id: prod._id}, {$set: {"durability": dur, "roundNotes": ["Lack of resources to run!"], "roundRun": true}}, {multi: false});
+          }
+          freshFactCount[prod.kind] += 1;
+          if (prod.kind == "p1" || prod.kind == "p1") {
+            parks += 1;
+          }
         }
-        else {
-          dur = prod.durability + 1;
-          Producers.update({_id: prod._id}, {$set: {"durability": dur, "roundNotes": ["Lack of resources to run!"], "roundRun": true}}, {multi: false});
+
+        if ((res.f1 + res.f2) / newpoll > 2) {
+          newpop = newpop + 1;
+          roundNotes.push("Satisfactory food, gained population!");
         }
-        freshFactCount[prod.kind] += 1;
-        if (prod.kind == "p1" || prod.kind == "p1") {
-          parks += 1;
+
+        else if ((res.f1 + res.f2) / newpoll < 0.8) {
+          newpop = newpop - 1;
+          roundNotes.push("Lack of food, lost population!");
         }
-      }
 
-      if ((res.f1 + res.f2) / newpoll > 2) {
-        newpop = newpop + 1;
-        roundNotes.push("Satisfactory food, gained population!");
-      }
-
-      else if ((res.f1 + res.f2) / newpoll < 0.8) {
-        newpop = newpop - 1;
-        roundNotes.push("Lack of food, lost population!");
-      }
-
-      if ((freshFactCount["p1"] + freshFactCount["p2"]*1.0) / newpop  <= 0.2) {
-        newhapp -= 1;
-        // console.log("parks to population increase");
-        roundNotes.push("Lack of parks, losing happiness");
-      }
-
-      if (newhapp < 0) {
-        newpop = newpop - 1;
-        roundNotes.push("Everybody's too sad, people leaving!");
-      }
-
-      if (newpoll > 6) {
-        pollLeak = Math.floor( (newpoll - 3 ) / 3);
-        // roundNotes.push("High pollution, leaking onto neighbors!");
-        // gnumber = admin.groupList.indexOf(base.playerName);
-        // neighbors = 
-        console.log("pollution leaaaakk");
-        for (n in base.neighbors){
-          console.log("hitting the neighbs");
-          Games.update({$and: [{"gameCode": gameCode}, {"role": "base"}, {"playerName": base.neighbors[n]}]}, {$inc: {"pollution": pollLeak}}, {$push: {"notes": "A neighbor leaked pollution on to you!"}});  
-          roundNotes.push("High pollution, leaked " + pollLeak + " pollution to " + base.neighbors[n]);
+        if ((freshFactCount["p1"] + freshFactCount["p2"]*1.0) / newpop  <= 0.2) {
+          newhapp -= 1;
+          // console.log("parks to population increase");
+          roundNotes.push("Lack of parks, losing happiness");
         }
-        
-      }
 
-      Games.update({"_id": base._id}, {$set: {"res": res, "pollution": newpoll, "happiness": newhapp, "population": newpop, "roundNotes": roundNotes}});
+        if (newhapp < 0) {
+          newpop = newpop - 1;
+          roundNotes.push("Everybody's too sad, people leaving!");
+        }
+
+        if (newpoll > 6) {
+          pollLeak = Math.floor( (newpoll - 3 ) / 3);
+          // roundNotes.push("High pollution, leaking onto neighbors!");
+          // gnumber = admin.groupList.indexOf(base.playerName);
+          // neighbors = 
+          // console.log("pollution leaaaakk");
+          for (n in base.neighbors){
+            
+            if (pollLeak > 0){
+              // console.log("hitting the neighbs " + base.neighbors[n]) + " " + pollLeak;
+              neighGame = Games.findOne({$and: [{"gameCode": gameCode}, {"role": "base"}, {"playerName": base.neighbors[n]}]})
+              console.log(neighGame.pollution);
+              // console.log(Games.findOne({$and: [{"gameCode": gameCode}, {"role": "base"}, {"playerName": base.neighbors[n]}]}));
+              // Games.update({$and: [{"gameCode": gameCode}, {"role": "base"}, {"playerName": base.neighbors[n]}]}, {$inc: {"pollution": pollLeak}}, {$push: {"notes": "A neighbor leaked pollution on to you!"}});  
+              Games.update({_id: neighGame._id}, {$set: {"pollution": neighGame.pollution + pollLeak}});
+              // console.log(neighGame.pollution);
+              Games.update({_id: neighGame._id}, {$push: {"roundNotes": "A neighbor leaked pollution on to you!"}})
+            }
+            // roundNotes.push("High pollution, leaked " + pollLeak + " pollution to " + base.neighbors[n]);
+          }
+          
+        }
+        if (newhapp < 0) {
+          newhapp = 0;
+        }
+        if (newpoll < 0) {
+          newpoll = 0;
+        }
+        if (newpop < 0) {
+          newpop = 0;
+        }
+
+        Games.update({"_id": base._id}, {$set: {"res": res, "pollution": newpoll, "happiness": newhapp, "population": newpop, "roundNotes": roundNotes}});
+      }
     }
       // RunBids
       // History.insert({"time": new Date().getTime(), "city": city.name, "cityid": city._id, "res": res, "pollution": newpoll, "happiness": newhapp, "population": newpop});
@@ -362,7 +385,9 @@ export const AddTeamNote = new ValidatedMethod({
   name: 'notes.teamadd',
   validate ({}) {},
   run({gameCode, baseId, notes}) {
-    Games.update({$and: [{"gameCode": gameCode}, {"playerId": baseId}]}, {$push: {"roundNotes": {$each: notes}}});
+    if (!this.isSimulation){
+      Games.update({$and: [{"gameCode": gameCode}, {"playerId": baseId}]}, {$push: {"roundNotes": {$each: notes}}}, {multi: true});
+    }
   }
 });
 
@@ -370,7 +395,9 @@ export const ResetFactoryNotes = new ValidatedMethod({
   name: 'resetnotes.factory',
   validate ({}) {},
   run({gameCode}) {
-    Producers.update({"gameCode": gameCode}, {$set: {"roundNotes": [], "roundRun": false}});
+    if (!this.isSimulation){
+      Producers.update({"gameCode": gameCode}, {$set: {"roundNotes": [], "roundRun": false}}, {multi: true});
+    }
   }
 });
 
@@ -378,7 +405,10 @@ export const ResetTeamNotes = new ValidatedMethod({
   name: 'resetnotes.team',
   validate ({}) {},
   run({gameCode}) {
-    Games.update({"gameCode": gameCode}, {$set: {"roundNotes": [], "roundRun": false}});
+    if (!this.isSimulation){
+      // console.log("")
+      Games.update({"gameCode": gameCode}, {$set: {"roundNotes": [], "roundRun": false}}, {multi: true});
+    }
   }
 });
 
@@ -387,33 +417,34 @@ export const NewRound = new ValidatedMethod({
   validate ({}) {},
   run({gameCode, producerCount = 3}) {
     //reset factory notes, and team notes
+    if (!this.isSimulation){
+      ResetFactoryNotes.call({"gameCode": gameCode});
 
-    ResetFactoryNotes.call({"gameCode": gameCode});
+      ResetTeamNotes.call({"gameCode": gameCode});
 
-    ResetTeamNotes.call({"gameCode": gameCode});
+      ConsumeResources.call({}, (err, res) => {
+        if (err) {console.log(err);}
+      });
 
-    ConsumeResources.call({}, (err, res) => {
-      if (err) {console.log(err);}
-    });
+      RunBids.call({"gameCode": gameCode});
 
-    RunBids.call({"gameCode": gameCode});
-
-    // FlushProducers.call({"gameCode": gameCode}, (err, res) => {
-    //   if (err) {console.log(err);}
-    // });
-    diffResources = shuffle(resources);
-    for (var i = 0; i < producerCount; i++) { 
-      //for each kind of resource 
-        //if there are not 4 factories available with that bidkind, add a factory
-      res = diffResources[(i % resources.length)];
-        if (Producers.find({$and: [{"bidKind": res}, {"gameCode": gameCode}, {"owned": false}, {"visible": true}]}).fetch().length < 4) {
-          RandomProducer.call({"chosenType": i, "gameCode": gameCode, "bidKind": res}, (err, res) => {
-            if (err) {console.log(err);}
-          });
-        // }
+      // FlushProducers.call({"gameCode": gameCode}, (err, res) => {
+      //   if (err) {console.log(err);}
+      // });
+      diffResources = shuffle(resources);
+      for (var i = 0; i < producerCount; i++) { 
+        //for each kind of resource 
+          //if there are not 4 factories available with that bidkind, add a factory
+        res = diffResources[(i % resources.length)];
+          if (Producers.find({$and: [{"bidKind": res}, {"gameCode": gameCode}, {"owned": false}, {"visible": true}]}).fetch().length < 4) {
+            RandomProducer.call({"chosenType": i, "gameCode": gameCode, "bidKind": res}, (err, res) => {
+              if (err) {console.log(err);}
+            });
+          // }
+        }
       }
+      console.log("new round called");
     }
-    console.log("new round called");
   }
 });
 
@@ -444,21 +475,23 @@ export const TradeResources = new ValidatedMethod({
     // Cities.findOne({"_id": from})
     // console.log(Cities.findOne({"name": from}));
     // console.log(from);
-    fromGroup = Games.findOne({$and: [{"gameCode": from.gameCode},  {"group": from.group}, {"role": "base"}]});
-    fromres = fromGroup.res;
-    toGroup = Games.findOne({$and: [{"gameCode": to.gameCode},  {"group": to.group}, {"role": "base"}]});
-    tores = toGroup.res;
+    if (!this.isSimulation){
+      fromGroup = Games.findOne({$and: [{"gameCode": from.gameCode},  {"group": from.group}, {"role": "base"}]});
+      fromres = fromGroup.res;
+      toGroup = Games.findOne({$and: [{"gameCode": to.gameCode},  {"group": to.group}, {"role": "base"}]});
+      tores = toGroup.res;
 
-    // tores = Cities.findOne({"name": to}).res;
-    if(parseInt(fromres[resource]) >= amount){
-      fromres[resource] = parseInt(fromres[resource]) - parseInt(amount);
-      tores[resource] = parseInt(tores[resource]) +  parseInt(amount);
-      Games.update({"_id": fromGroup._id}, {$set: {"res": fromres}});
-      Games.update({"_id": toGroup._id}, {$set: {"res": tores}});
-    }
-    else {
-      console.log("under resourced");
-      throw new Error("not enough resource!");
+      // tores = Cities.findOne({"name": to}).res;
+      if(parseInt(fromres[resource]) >= amount){
+        fromres[resource] = parseInt(fromres[resource]) - parseInt(amount);
+        tores[resource] = parseInt(tores[resource]) +  parseInt(amount);
+        Games.update({"_id": fromGroup._id}, {$set: {"res": fromres}});
+        Games.update({"_id": toGroup._id}, {$set: {"res": tores}});
+      }
+      else {
+        console.log("under resourced");
+        throw new Error("not enough resource!");
+      }
     }
   }
 });

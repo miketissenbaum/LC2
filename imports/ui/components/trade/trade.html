@@ -23,32 +23,13 @@
   </form>
   <br />
 
-</template>
+  <!-- <section id="metalResourceBox"> -->
+    <div id="m1Items">  <img class="cityIcon" src="../img/icons/gold_sml.png">  = M1</div>  
+    <div id="m2Items"><img class="cityIcon" src="../img/icons/steel_sml.png">   = M2</div>
+ <!--  </section>
+  <section id=foodResourceBox> -->
+    <div id="f1Items"> <img class="cityIcon" src="../img/icons/food_sml.png">  = F1 </div>   
+    <div id="f2Items"> <img class="cityIcon" src="../img/icons/cotton_sml.png">  = F2 </div>
+  <!-- </section> -->
 
-
-<template name="individualTrade">
-  <h3> Trade! </h3>
-  <form class="trade">
-    <input type="number" name="amount" placeholder="Amount to send" />
-    <select id="resource">
-      {{#each resource}}
-        <option value = {{name}}>{{name}}</option>
-      {{/each}}
-    </select>
-
-    To: <select id="to-city">
-      {{#each city}}
-        <option value = {{name}}>{{name}}</option>
-      {{/each}}
-    </select>
-
-    From: <select id="from-city">
-      {{#each city}}
-        <option value = {{name}}>{{name}}</option>
-      {{/each}}
-    </select>
-    <input type="submit" value="trade"/>
-  </form>
-  <br />
-  <button class="reset"> Reset everything </button>
 </template>
