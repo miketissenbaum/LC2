@@ -118,10 +118,21 @@
 }
 
 .factoryCards {
-    width: 35%;
-    font-weight: bold;
-    float: left;
-    margin: 5px;
+	/*width: 20%;*/
+  font-weight: bold;
+  /*padding: 10;*/
+}
+
+table {
+	border-collapse: separate;
+	border-spacing: 10px;
+}
+
+td {
+  width: 35%;
+  font-weight: bold;
+  float: left;
+  margin: 5px;
 }
 
 button {

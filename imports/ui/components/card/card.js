@@ -1,15 +1,20 @@
 import './card.html';
 import { Producers } from '/imports/api/links/links.js';
+import { Bids } from '/imports/api/links/links.js';
 // import { Assets } from '/imports/api/links/links.js';
 import { Meteor } from 'meteor/meteor';
 import { NewRound } from '/imports/api/links/methods.js';
 import { BuyProducer } from '/imports/api/links/methods.js';
+import { MakeBid } from '/imports/api/links/methods.js';
+import { Games } from '/imports/api/links/links.js';
 
 Template.factoryList.onCreated(function helloOnCreated() {
   // counter starts at 0
   this.city = new ReactiveVar("city1");
 
   Meteor.subscribe('producers.public');
+  Meteor.subscribe('games.running');
+  // Meteor.subscribe('bids.local');
   // Meteor.subscribe('assets.all');
 
   
@@ -91,6 +96,9 @@ Template.factoryList.events({
 
 });
 
+Template.factoryList.onCreated(function helloOnCreated() {
+  Meteor.subscribe('bids.local');
+});
 
 Template.factory.helpers({
   OutputIcon() {
@@ -140,6 +148,23 @@ Template.factory.helpers({
    }
    return costText;
  },
+
+  FactoryBid() {
+   // console.log(Bids.findOne({}));
+   // console.log(this._id);
+   bid = Bids.findOne({"producer": this._id})
+   // console.log(Bids.findOne());
+   if (bid != undefined){
+     console.log(bid.bidVal);
+     return bid.bidVal;
+   }
+   else {
+     return "";
+   }
+ },
+
+
+
 
  // ProdInfo() {
  //   costText = "";
@@ -207,7 +232,15 @@ Template.factory.events({
 
   'click .bid' (event, instance) {
     event.preventDefault();
-    console.log(event.target.text);
+    // console.log(event.target.text);
     console.log(event.target.name);
+    val = parseInt(event.target.name);
+    thisGroup = Games.findOne({"gameCode": FlowRouter.getParam("gameCode")});
+    if (thisGroup.role != "base") {
+      FlowRouter.go('home');
+    }
+    else{
+      MakeBid.call({"baseId": Meteor.userId(), "producer": this._id, "group": thisGroup.group, "gameCode": FlowRouter.getParam("gameCode"), "change": val});
+    }
   }
 });

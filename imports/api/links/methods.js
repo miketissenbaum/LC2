@@ -93,6 +93,9 @@ export const RandomProducer = new ValidatedMethod({
         //pick a random kind
         //populate producers with a producer with a prod cost, prodvalues, ""
         Producers.insert(currentProd);
+        /******* GET THE KEY OF THE PRODUCER INSERTED
+        make a bid on it from every team
+        ********/
     }
     return true;
   }
@@ -309,7 +312,8 @@ export const StartGame = new ValidatedMethod({
   validate({}) {},
   run({cityCount, adminId, adminUsername}) {
     if (!this.isSimulation) {
-      baseList = shuffle(baseUsers);
+      // baseList = shuffle(baseUsers);
+      baseList = baseUsers;
       allGames = Games.find({}, {"gameCode": 1}).fetch();
       
       gameCodes = [];
@@ -422,3 +426,57 @@ function ConsumeResources() {
 
 }
 */
+
+export const MakeBid = new ValidatedMethod({
+  name: 'bid.make',
+  validate({}) {},
+  run({baseId, producer, group, gameCode, change}) {
+    if (!this.isSimulation) {
+      var existBid = Bids.findOne({$and: [{"producer": producer}, {"group": group}]});
+      if (existBid == undefined) {
+        if (change < 0) {
+          change = 0;
+        }
+        Bids.insert({
+          "producer": producer,
+          "group": group,
+          "gameCode": gameCode,
+          "baseId": baseId,
+          "bidVal": change
+        });
+      }
+      else {
+        change = existBid.bidVal + change;
+        if (change < 0) {
+          change = 0;
+        }
+        Bids.update({"_id": existBid._id}, {$set: {"bidVal": change}});
+      }
+      
+      // Bids.update( {"gameCode": FlowRouter.getParam("gameCode")})
+
+      // Games.insert({
+      //   "gameCode": newgc, 
+      //   "playerName": adminUsername, 
+      //   "playerId": adminId,
+      //   "role": "admin",
+      //   "status": "running",
+      //   "group": "none",
+      //   "groupList":  baseList.slice(0,cityCount)
+      // });
+      // for (var i = 0; i < cityCount; i++) {
+      //   // console.log(baseList[i]);
+      //   console.log(Meteor.users.find({}).fetch());
+      //   JoinGame.call({"playerName": baseList[i], "playerId": Meteor.users.findOne({"profile.name": baseList[i]})._id, "gameCode": newgc, "role": "base"}, (err, res) => {
+      //     if (err) {
+      //       console.log(err);
+      //       return err;
+      //     }
+      //     else {
+      //       return res;
+      //     }
+      //   });
+      // }
+    }
+  }
+});
