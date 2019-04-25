@@ -1,6 +1,6 @@
 <template name="cities">
-  <table cellpadding="10">
-    <tr>
+  <table cellpadding="10" class="cityTable">
+    <tr >
       <!-- {{#if notCityView}}
       	{{#each allCities}}
           <td width = 50%>
@@ -9,7 +9,7 @@
         {{/each}}
       {{else}} -->
         {{#each citySet}}
-          <td>
+          <td class="cityRow">
             {{> city}}
           </td>
         {{/each}}

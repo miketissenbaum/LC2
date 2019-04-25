@@ -20,6 +20,14 @@
 	margin-top: 10px;
 }
 
+.cityTable {
+	width: 65%;
+}
+
+.cityRow {
+	width: 100%;
+}
+
 .resourceLabel{
 	font-weight: bold;
 	font-size: 1em;
@@ -118,9 +126,9 @@
 }
 
 .factoryCards {
-	/*width: 20%;*/
-  font-weight: bold;
-  /*padding: 10;*/
+	width: 20%;
+  	font-weight: bold;
+  	padding: 10;
 }
 
 table {
@@ -155,4 +163,6 @@ body {
 
 .marketType {
 	padding-left: 40px;
+	width: 200px;
+	padding-top: 25px;
 }
