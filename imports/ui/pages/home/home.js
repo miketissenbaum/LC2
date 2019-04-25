@@ -13,6 +13,7 @@ import '../../components/info/info.js';
 // import '../../components/hello/hello.js';
 
 import '../../components/admin/admin.js';
+import '../../components/central/central.js';
 
 Template.App_home.helpers({
   // player() {

@@ -56,4 +56,8 @@ Template.adminGame.events({
       if (err) {console.log(err);}
     })
   },
+
+  'click .seeScore' (event, instance) {
+    FlowRouter.go('App.scoreboard', {gameCode: FlowRouter.getParam("gameCode")});
+  }
 });

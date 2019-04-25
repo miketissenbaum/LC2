@@ -275,7 +275,10 @@ export const ConsumeResources = new ValidatedMethod({
       // factCount = city.factoryCount;
       parks = 0;
       roundNotes = [];
-      Producers.find({$and: [{"owned": true}, {"ownerId": base._id}]}).forEach(function (prod) {
+      // console.log(base.playerId);
+      // console.log(Producers.find({"owned": true}).fetch());
+      Producers.find({$and: [{"owned": true}, {"ownerId": base.playerId}]}).forEach(function (prod) {
+        console.log("running producer");
         efficiency = 1;
         dur = prod.durability;
         // if (factCount[prod.kind] > 1) {
@@ -286,6 +289,7 @@ export const ConsumeResources = new ValidatedMethod({
         for (r in prod.prodCosts) {
           if ((res[r] -  prod.prodCosts[r]) < 0) {
             affordable = false;
+            console.log("factory not affordable")
             // Producers.update({"_id": prod._id},{$set: {}});
           }
         }
@@ -298,7 +302,7 @@ export const ConsumeResources = new ValidatedMethod({
               res[r] += Math.round(prod.prodValues[r] * efficiency);
             }
             else {
-                newpoll = newpoll + prod.prodValues[r];
+              newpoll = newpoll + prod.prodValues[r];
             }
           }
           Producers.update({_id: prod._id}, {$set: {"roundNotes": ["Run successful!"]}});
