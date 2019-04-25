@@ -76,6 +76,15 @@ FlowRouter.route('/games/:gameCode', {
   },
 });
 
+FlowRouter.route('/games/:gameCode/score', {
+  name: 'App.scoreboard',
+  triggersEnter: [isNotLoggedIn],
+  action(params, queryParams) {
+    BlazeLayout.render('App_body', { main: 'scoreBoard'});
+  },
+});
+
+
 FlowRouter.notFound = {
   action() {
     BlazeLayout.render('App_body', { main: 'App_notFound' });
