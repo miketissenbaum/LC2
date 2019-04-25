@@ -9,7 +9,7 @@
         {{/each}}
       {{else}} -->
         {{#each citySet}}
-          <td width = 50%>
+          <td>
             {{> city}}
           </td>
         {{/each}}
@@ -34,7 +34,7 @@
   <div id="cityBox">
     <p class="cityName">{{name}} </p>
     <section id=resourceBox>
-      <h3>Your City's Reseources</h3>
+      <h3>Your City's Resources</h3>
       <section id="metalResourceBox">
         <div id="m1Items">  <img class="cityIcon" src="../img/icons/gold_sml.png"> {{res.m1}}</div>  
         <div id="m2Items"><img class="cityIcon" src="../img/icons/steel_sml.png">  {{res.m2}}</div>
@@ -62,6 +62,7 @@
             </td>
           {{/each}}
         </tr>
+        <tr>Notes: {{#each roundNotes}}  {{this}} <br />   {{/each}}</tr>
       </table>
     </section>
   </div>
@@ -78,4 +79,5 @@
      <!-- <p>test</p> -->
    {{/each}}
   {{/each}}<br />
+  Notes: {{#each roundNotes}}  {{this}} <br />   {{/each}}
 </template>

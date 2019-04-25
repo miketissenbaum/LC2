@@ -87,7 +87,8 @@ export const RandomProducer = new ValidatedMethod({
           "owned": false,
           "visible": true,
           "owner": 0,
-          "durability": 0
+          "durability": 0,
+          "roundNotes": []
         };
 
         //pick a random kind
@@ -144,26 +145,30 @@ export const ConsumeResources = new ValidatedMethod({
   name: 'producers.consume',
   validate ({}) {},
 
-  run ({}) {
+  run ({gameCode}) {
     // city = Cities.findOne({"name": prod["owner"]});
-    Cities.find({}).forEach(function (city) {
-      res = city.res;
-      newpoll = parseInt(city.pollution) * 1.0;
-      newpop = parseInt(city.population);
-      newhapp = parseInt(city.happiness);
+    admin = Games.findOne({$and: [{"gameCode": gameCode}, {"role": "admin"}]});
+    Games.find({$and: [{"gameCode": gameCode}, {"role": "base"}]}).forEach(function (base) {
+      res = base.res;
+      newpoll = parseInt(base.pollution) ;
+      newpop = parseInt(base.population);
+      newhapp = parseInt(base.happiness);
       freshFactCount = {"m1": 0, "m2": 0, "f1": 0, "f2": 0, "p1": 0, "p2": 0};
-      factCount = city.factoryCount;
+      // factCount = city.factoryCount;
       parks = 0;
+      roundNotes = [];
       Producers.find({$and: [{"owned": true}, {"owner": city.name}]}).forEach(function (prod) {
         efficiency = 1;
         dur = prod.durability;
-        if (factCount[prod.kind] > 1) {
-          efficiency = 1.3;
-        }
+        // if (factCount[prod.kind] > 1) {
+        //   efficiency = 1.3;
+        // }
+
         affordable = true;
         for (r in prod.prodCosts) {
           if ((res[r] -  prod.prodCosts[r]) < 0) {
             affordable = false;
+            Producers.update({"_id": prod._id},{$set: {}});
           }
         }
         if (affordable == true){
@@ -178,40 +183,54 @@ export const ConsumeResources = new ValidatedMethod({
                 newpoll = newpoll + prod.prodValues[r];
             }
           }
+          Producers.update({_id: prod._id}, {$set: {"roundNotes": ["Run successful!"]}});
         }
         else {
           dur += 1;
-          Producers.update({_id: prod._id}, {$set: {"durability": dur}})
+          Producers.update({_id: prod._id}, {$set: {"durability": dur, "roundNotes": ["Lack of resources to run!"]}});
         }
         freshFactCount[prod.kind] += 1;
         
         if (prod.kind == "p1" || prod.kind == "p1") {
           parks += 1;
-          // console.log(parks + " number of parks");
         }
-        
-        console.log(newpoll);
 
       });
 
       if ((res.f1 + res.f2) / newpoll > 2) {
         newpop = newpop + 1;
+        roundNotes.push("Satisfactory food, gained population!");
       }
 
       else if ((res.f1 + res.f2) / newpoll < 0.8) {
         newpop = newpop - 1;
+        roundNotes.push("Lack of food, lost population!");
       }
 
       if ((freshFactCount["p1"] + freshFactCount["p2"]*1.0) / newpop  <= 0.2) {
         newhapp -= 1;
         // console.log("parks to population increase");
+        roundNotes.push("Lack of parks, losing happiness");
       }
 
       if (newhapp < 0) {
         newpop = newpop - 1;
+        roundNotes.push("Everybody's too sad, people leaving!");
       }
 
-      Cities.update({"_id": city._id}, {$set: {"res": res, "pollution": newpoll, "happiness": newhapp, "population": newpop}});
+      if (newpoll > 6) {
+        pollLeak = Math.floor( (newpoll - 3 ) / 3);
+        // roundNotes.push("High pollution, leaking onto neighbors!");
+        // gnumber = admin.groupList.indexOf(base.playerName);
+        // neighbors = 
+        for (n in base.neighbors){
+          Games.update({$and: [{"gameCode": gameCode}, {"role": "base"}, {"playerName": base.neighbors[n]}]}, {$inc: {"pollution": pollLeak}});  
+          roundNotes.push("High pollution, leaked " + pollLeak + " pollution to " + base.neighbors[n]);
+        }
+        
+      }
+
+      Games.update({"_id": base._id}, {$set: {"res": res, "pollution": newpoll, "happiness": newhapp, "population": newpop, "roundNotes": roundNotes}});
       History.insert({"time": new Date().getTime(), "city": city.name, "cityid": city._id, "res": res, "pollution": newpoll, "happiness": newhapp, "population": newpop});
     });
   }
@@ -267,19 +286,26 @@ export const TradeResources = new ValidatedMethod({
   run ({amount, resource, from, to}){
     // Producers.update({$and: [{"owned": false, "visible": true}]}, {$set: {"visible": false}}, {multi: true});
     // console.log("producers flushed");
-    resres = "res." + resource;
+    // resres = "res." + resource;
     // Cities.findOne({"_id": from})
     // console.log(Cities.findOne({"name": from}));
     // console.log(from);
-    fromres = Cities.findOne({"name": from}).res;
-    tores = Cities.findOne({"name": to}).res;
+    fromGroup = Games.findOne({$and: [{"gameCode": from.gameCode},  {"group": from.group}, {"role": "base"}]});
+    fromres = fromGroup.res;
+    toGroup = Games.findOne({$and: [{"gameCode": to.gameCode},  {"group": to.group}, {"role": "base"}]});
+    tores = toGroup.res;
+
+    // tores = Cities.findOne({"name": to}).res;
     if(parseInt(fromres[resource]) >= amount){
       fromres[resource] = parseInt(fromres[resource]) - parseInt(amount);
       tores[resource] = parseInt(tores[resource]) +  parseInt(amount);
-      Cities.update({"name": from}, {$set: {"res": fromres}});
-      Cities.update({"name": to}, {$set: {"res": tores}});
+      Games.update({"_id": fromGroup._id}, {$set: {"res": fromres}});
+      Games.update({"_id": toGroup._id}, {$set: {"res": tores}});
     }
-    else {console.log("under resourced");}
+    else {
+      console.log("under resourced");
+      throw new Error("not enough resource!");
+    }
   }
 });
 
@@ -289,7 +315,19 @@ export const ResetAll = new ValidatedMethod({
   run({gameCode}) {
     factCount = {"m1": 0, "m2": 0, "f1": 0, "f2": 0, "p1": 0, "p2": 0};
 
-    Games.update({$and: [{"gameCode": gameCode}, {"role": "base"}]}, {$set: {"factoryCount": factCount, "res": {"m1": 2, "m2": 2, "f1": 2, "f2": 2}, "pollution": 0, "population": 5, "happiness": 5}}, {multi: true, upsert: true});
+    Games.update(
+      {$and: [
+        {"gameCode": gameCode}, 
+        {"role": "base"}]
+      }, 
+      {$set: {
+        "factoryCount": factCount, 
+        "res": {"m1": 2, "m2": 2, "f1": 2, "f2": 2}, 
+        "pollution": 0, 
+        "population": 5, 
+        "happiness": 5,
+        "roundNotes": []
+      }}, {multi: true, upsert: true});
     // Cities.update({"name": "city2"}, {$set: {"name": "city2", "factoryCount": factCount, "res": {"m1": 2, "m2": 2, "f1": 2, "f2": 2}, "poll": 0, "population": 5, "happiness": 5}}, {upsert: true})
     Producers.remove({});
     
@@ -337,7 +375,17 @@ export const StartGame = new ValidatedMethod({
       for (var i = 0; i < cityCount; i++) {
         // console.log(baseList[i]);
         console.log(Meteor.users.find({}).fetch());
-        JoinGame.call({"playerName": baseList[i], "playerId": Meteor.users.findOne({"profile.name": baseList[i]})._id, "gameCode": newgc, "role": "base"}, (err, res) => {
+        neighbors = [];
+        if (i == 0) {
+          neighbors.push(baseList[cityCount - 1]);
+          neighbors.push(baseList[i + 1]);
+        }
+        else {
+          neighbors.push(baseList[i - 1]);
+          neighbors.push(baseList[((i + 1) % cityCount)]);
+        }
+        // neighbors = baseList[i - 1];
+        JoinGame.call({"playerName": baseList[i], "playerId": Meteor.users.findOne({"profile.name": baseList[i]})._id, "gameCode": newgc, "role": "base", "neighbors": neighbors}, (err, res) => {
           if (err) {
             console.log(err);
             return err;
@@ -372,7 +420,7 @@ generate_random_string = function(string_length){
 export const JoinGame = new ValidatedMethod({
   name: 'game.join',
   validate({}) {},
-  run({playerName, playerId, gameCode, role}) {
+  run({playerName, playerId, gameCode, role, neighbors = []}) {
     if (!this.isSimulation) {
       gameAdmin = Games.findOne({$and: [{"gameCode": gameCode}, {"role": "admin"}]});
       console.log(gameAdmin);
@@ -394,6 +442,7 @@ export const JoinGame = new ValidatedMethod({
           console.log("group is " + grp);
           group = grp;  
         }
+
         Games.update({
           "gameCode": gameCode, 
           "playerId": playerId

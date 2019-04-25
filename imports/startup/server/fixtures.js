@@ -51,6 +51,17 @@ Meteor.startup(() => {
         }
       });
     }
+    Accounts.createUser({
+      username: "boss",
+      email : "boss@boss.com",
+      password : "abcdefgh",
+      profile  : {
+          //publicly visible fields like firstname goes here
+          "name": boss,
+          "lastname": man
+      }
+    });
+
   }
   // }
 

@@ -161,6 +161,10 @@ Template.cityFactory.helpers({
     // console.log(costText);
 
     return costText;
-  }
+  },
+
+  // FactoryNotes() {
+    
+  // }
 });
 

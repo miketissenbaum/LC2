@@ -98,6 +98,7 @@ Template.factoryList.events({
 
 Template.factoryList.onCreated(function helloOnCreated() {
   Meteor.subscribe('bids.local');
+  Meteor.subscribe('games.running');
 });
 
 Template.factory.helpers({
@@ -152,15 +153,20 @@ Template.factory.helpers({
   FactoryBid() {
    // console.log(Bids.findOne({}));
    // console.log(this._id);
-   bid = Bids.findOne({"producer": this._id})
+   bid = Bids.findOne({"producer": this._id});
    // console.log(Bids.findOne());
+
+   thisGame = Games.findOne({$and: [{"gameCode": FlowRouter.getParam("gameCode")}, {"playerId": Meteor.userId()}]});
+
+   valtext = ""
    if (bid != undefined){
-     console.log(bid.bidVal);
-     return bid.bidVal;
+     valtext = bid.bidVal;
+     if (thisGame.res[this.bidKind] < bid.bidVal) {
+       valtext += " - Can't Afford!";
+     }
+     // console.log(bid.bidVal);
    }
-   else {
-     return "";
-   }
+   return valtext;
  },
 
 
