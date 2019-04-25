@@ -137,7 +137,7 @@ table {
 }
 
 td {
-  width: 35%;
+  /*width: 35%;*/
   font-weight: bold;
   float: left;
   margin: 5px;

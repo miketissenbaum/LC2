@@ -17,7 +17,7 @@ Template.gameList.helpers({
     // console.log(Meteor.userId());
     // console.log(Games.find({"playerId": Meteor.userId()}).fetch());
     // console.log(Games.find().fetch());
-    return Games.find({});
+    return Games.find({"playerId": Meteor.userId()});
   },
 
   gameSize() {

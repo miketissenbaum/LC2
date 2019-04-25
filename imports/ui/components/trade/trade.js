@@ -20,7 +20,7 @@ Template.trade.helpers({
     thisGame = Games.findOne({$and: [{"playerId": Meteor.userId()}, {"gameCode": gCode}]});
     thisGroup = thisGame.group;
     // console.log(thisGame);
-    return Games.find({$and: [{"gameCode": gCode}, {"role": "player"}, {"group": {$ne: group}}]});
+    return Games.find({$and: [{"gameCode": gCode}, {"role": "player"}, {"group": {$ne: thisGroup}}]});
   },
 
 });
@@ -36,11 +36,15 @@ Template.trade.events({
     // fromGroup =  Games.findOne({$and: [{"playerId": Meteor.userId()}, {"gameCode": gCode}]}).group;
     from =  Games.findOne({$and: [{"playerId": Meteor.userId()}, {"gameCode": gCode}]});
     to = Games.findOne({"_id": event.target["to-city"].value});
-    if (val == "") {
-      // console.log("empty val");
+    if (val == "" || event.target["to-city"].value == "") {
+      console.log("empty val");
     }
     else {
-      TradeResources.call({"amount": parseInt(val), "resource": res, "from": from, "to": to});
+      TradeResources.call({"amount": parseInt(val), "resource": res, "from": from, "to": to}, (err, res) => {
+        if (err) {
+          alert(err);
+        }
+      });
     }
     // console.log(event.target["to-city"].value);
     
