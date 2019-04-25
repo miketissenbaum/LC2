@@ -5,6 +5,7 @@ import { Links } from '../links.js';
 import { Producers } from '../links.js';
 import { Cities } from '../links.js';
 import { Games } from '../links.js';
+import { Bids } from '../links.js';
 
 import { Assets } from '../links.js';
 
@@ -49,6 +50,16 @@ Meteor.publish('games.running', function () {
 Meteor.publish('games.all', function () {
   // console.log(this.users());
   return Games.find({$and: [{"status": "running"}]});
+});
+
+Meteor.publish('bids.all', function () {
+  // console.log(this.users());
+  return Bids.find({});
+});
+
+Meteor.publish('bids.local', function () {
+  // console.log(this.users());
+  return Bids.find({"baseId": Meteor.userId()});
 });
 
 

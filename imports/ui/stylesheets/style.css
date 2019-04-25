@@ -113,8 +113,18 @@
 }
 
 .factoryCards {
-	width: 20%;
-    font-weight: bold;
+	/*width: 20%;*/
+  font-weight: bold;
+  /*padding: 10;*/
+}
+
+table {
+	border-collapse: separate;
+	border-spacing: 10px;
+}
+
+td {
+	padding: 10px;
 }
 
 button {
