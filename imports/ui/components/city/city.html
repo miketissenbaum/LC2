@@ -57,7 +57,7 @@
       <table cellpadding="10">
         <tr>
           {{#each cityFactories}}
-            <td bgcolor="{{producerColor}}">
+            <td bgcolor="{{producerColor}}" class="cityFactoryInfo">
               {{> cityFactory}}
             </td>
           {{/each}}
@@ -70,14 +70,31 @@
 </template>
 
 <template name="cityFactory">
-  You have a {{kind}} producer. <br />
-  Produces:{{productionValues}} <br />
-  While using: {{productionCosts}}
+  <div class="cityFactoryInner">
+      <img class="factoryIcon" src="{{factoryIcon}}">
+      <!-- {{> factory}} -->
+  
+    <div id="productionValues">
+      <span class="productionLabel">Produces</span>
+      {{{CostInfo this.prodValues ""}}} 
+    </div>
+    <br />
+    <div id="consuptionValue">
+      <span class="productionLabel">Consumes</span>
+      {{{CostInfo this.prodCosts ""}}}
+    </div>
+  </div>
+<!--   <div id="consuptionValue">
+    <span class="productionLabel">Consumes</span>
+    {{{CostInfo this.prodCosts ""}}}
+  </div> -->
   {{#each productionRes}}
     <!-- <p> item </p> -->
    {{#each resValArr}}
      <!-- <p>test</p> -->
    {{/each}}
   {{/each}}<br />
+  <div class="cityFacotryNotes">
   Notes: {{#each roundNotes}}  {{this}} <br />   {{/each}}
+  </div>
 </template>
