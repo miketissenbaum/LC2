@@ -21,7 +21,7 @@
 }
 
 .cityTable {
-	width: 65%;
+	width: 100%;
 }
 
 .cityRow {
@@ -59,7 +59,9 @@
 
 #factoryBox {
 	margin-top: 15px;
-
+}
+.productionBox {
+	width: 100%;
 }
 
 #m1Items {
@@ -172,7 +174,7 @@ body {
 }
 
 .cityFactoryInfo {
-	width: 69%;
+	width: 33%;
 	padding: 5px;
 }
 
@@ -188,4 +190,13 @@ body {
     max-width: 32%;
 }*/
 
+.scoreboardRow {
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+    border-bottom: solid black 1px;
+}
 
+.teamName {
+	width: 100px;
+}

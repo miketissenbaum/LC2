@@ -172,7 +172,7 @@ Template.cityFactory.helpers({
     return costText;
   },
 
-    factoryIcon() {
+  factoryIcon() {
     factoryIconSource = {
       "p1": "../img/icons/park_med.png",
       "p2": "../img/icons/park_med.png",
