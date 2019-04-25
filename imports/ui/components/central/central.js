@@ -9,7 +9,7 @@ Template.cityStates.onCreated(function helloOnCreated() {
   // counter starts at 0
   // this.counter = new ReactiveVar(0);
   Meteor.subscribe('games.all');
-  Meteor.subscribe('producers.all');
+  // Meteor.subscribe('producers.all');
 });
 
 Template.cityStates.helpers({

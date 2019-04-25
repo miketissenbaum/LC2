@@ -60,7 +60,7 @@ Template.city.helpers({
   cityFactories() {
     // console.log(Producers.find({}).fetch());
     // console.log(Producers.find({$and: [{"gameCode": FlowRouter.getParam("gameCode")}, {"owned": true}, {"ownerId": Meteor.userId()}]}).fetch());
-    console.log(FlowRouter.getParam("gameCode") + " " + Meteor.userId());
+    // console.log(FlowRouter.getParam("gameCode") + " " + Meteor.userId());
     console.log(Producers.find({$and: [{"gameCode": FlowRouter.getParam("gameCode")}, {"ownerId": Meteor.userId()}]}).fetch());
     
     return Producers.find({$and: [{"gameCode": FlowRouter.getParam("gameCode")}, {"owned": true}, {"ownerId": Meteor.userId()}]});
@@ -140,7 +140,7 @@ Template.cityFactory.helpers({
       "pollution": "../img/icons/pollution_sml.png"
     };
     for (r in costList) {
-     console.log(r + " " + factoryOutputType[r]);
+     // console.log(r + " " + factoryOutputType[r]);
       if (costList[r] != 0 && costList[r] != undefined) {
        // costText += costList[r] + " " + r + ", ";
 

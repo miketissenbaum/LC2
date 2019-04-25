@@ -183,20 +183,30 @@ export const RunBids = new ValidatedMethod({
         // console.log(affBids);
 
         for (i in affBids) {
+          i = parseInt(i)
+          // console.log(i + " " + purchased); 
           if(purchased == "not yet"){
             if (i < (affBids.length - 1)){
+              // console.log(i+1);
+              // console.log(affBids[i]);
+              // console.log(affBids[(i + 1)]);
               if (affBids[i].bidVal == affBids[i + 1].bidVal) {
                 //raise alerts that bid failed!
                 purchased = "bid clash";
+                AddTeamNote.call({"gameCode": gameCode, "baseId": addBids[i].baseId, "notes": ["Bid failed cause it clashed with someone else!"]})
+                AddTeamNote.call({"gameCode": gameCode, "baseId": addBids[i + 1].baseId, "notes": ["Bid failed cause it clashed with someone else!"]})
+                console.log("bid clash");
               }
               else {
                 // bidder = Games.findOne({"_id": allBids[i].baseId});
                 purchased = "bid success";
+                console.log("bid success cause top bid led");
                 BuyProducer.call({"producer": prod._id, "player": affBids[i].baseId, "gameCode": gameCode, "bid": affBids[i]});
                 purchased = true;
               }
             }
             else {
+              console.log("bid success cause only 1 bid");
               purchased = "bid success";
               BuyProducer.call({"producer": prod._id, "player": affBids[i].baseId, "gameCode": gameCode, "bid": affBids[i]});
               purchased = true;
@@ -225,27 +235,14 @@ export const BuyProducer = new ValidatedMethod({
       prod = Producers.findOne({"_id": producer})
       cost = prod.buyCost;
       thisCity = Games.findOne({$and: [{"playerId": player}, {"gameCode": gameCode}, {"role":"base"}]});
-      if (thisCity) { // ***fix syntax here to check for contents
-        // thisCity = Cities.findOne({"name": player});
+      if (thisCity) { 
         res =  thisCity.res;
-        // factCount = thisCity.factoryCount;
         canbuy = true;
-        // newres = res;
-        // for (r in cost) {
-        //   if (cost[r] > res[r]) {
-        //     canbuy = false;
-        //   }
-        //   else {
-        //     newres[r] = res[r] - cost[r];
-        //   }
-        // }
+        
         res[bid.bidKind] = thisCity.res[bid.bidKind] - bid.bidVal;
         if (canbuy == true){
-          // factCount[prod.kind] += 1;
           Producers.update({"_id": producer}, {$set: {"owned": true, "ownerId": player}});
-          // Games.update({"name": player}, {$set: {"res": res, "factoryCount": factCount}});
           Games.update({"_id": thisCity._id}, {$set: {"res": res}});
-          // Meteor.call()
         }
         else {
           throw new Error("Wasn't able to afford the purchase!");
@@ -266,7 +263,11 @@ export const ConsumeResources = new ValidatedMethod({
   run ({gameCode}) {
     // city = Cities.findOne({"name": prod["owner"]});
     admin = Games.findOne({$and: [{"gameCode": gameCode}, {"role": "admin"}]});
-    Games.find({$and: [{"gameCode": gameCode}, {"role": "base"}]}).forEach(function (base) {
+    allBases = Games.find({$and: [{"gameCode": gameCode}, {"role": "base"}]}).fetch();
+    ResetFactoryNotes.call({gameCode});
+
+    for (b in allBases){
+      base = allBases[b];
       res = base.res;
       newpoll = parseInt(base.pollution) ;
       newpop = parseInt(base.population);
@@ -274,50 +275,45 @@ export const ConsumeResources = new ValidatedMethod({
       freshFactCount = {"m1": 0, "m2": 0, "f1": 0, "f2": 0, "p1": 0, "p2": 0};
       // factCount = city.factoryCount;
       parks = 0;
-      roundNotes = [];
-      // console.log(base.playerId);
+      roundNotes = base.roundNotes;
+      // console.log("base " + base.playerId);
       // console.log(Producers.find({"owned": true}).fetch());
-      Producers.find({$and: [{"owned": true}, {"ownerId": base.playerId}]}).forEach(function (prod) {
-        console.log("running producer");
-        efficiency = 1;
-        dur = prod.durability;
-        // if (factCount[prod.kind] > 1) {
-        //   efficiency = 1.3;
-        // }
-
+      allProds = Producers.find({$and: [{"gameCode": gameCode}, {"owned": true}, {"ownerId": base.playerId}]}).fetch()
+      affordableProds = [];
+      // console.log(allProds);
+      for (p in allProds){
+        prod = allProds[p];
         affordable = true;
         for (r in prod.prodCosts) {
           if ((res[r] -  prod.prodCosts[r]) < 0) {
             affordable = false;
-            console.log("factory not affordable")
-            // Producers.update({"_id": prod._id},{$set: {}});
           }
         }
-        if (affordable == true){
+
+        console.log(affordable + " " + prod._id);
+        if (affordable == true) {
           for (r in prod.prodCosts) {
             res[r] -= prod.prodCosts[r];
           }
           for (r in prod.prodValues) {
             if (r != "pollution"){
-              res[r] += Math.round(prod.prodValues[r] * efficiency);
+              res[r] += Math.round(prod.prodValues[r]);
             }
             else {
               newpoll = newpoll + prod.prodValues[r];
             }
           }
-          Producers.update({_id: prod._id}, {$set: {"roundNotes": ["Run successful!"]}});
+          Producers.update({_id: prod._id}, {$set: {"roundNotes": ["Run successful!"], "roundRun": true}}, {multi: false});
         }
         else {
-          dur += 1;
-          Producers.update({_id: prod._id}, {$set: {"durability": dur, "roundNotes": ["Lack of resources to run!"]}});
+          dur = prod.durability + 1;
+          Producers.update({_id: prod._id}, {$set: {"durability": dur, "roundNotes": ["Lack of resources to run!"], "roundRun": true}}, {multi: false});
         }
         freshFactCount[prod.kind] += 1;
-        
         if (prod.kind == "p1" || prod.kind == "p1") {
           parks += 1;
         }
-
-      });
+      }
 
       if ((res.f1 + res.f2) / newpoll > 2) {
         newpop = newpop + 1;
@@ -345,17 +341,44 @@ export const ConsumeResources = new ValidatedMethod({
         // roundNotes.push("High pollution, leaking onto neighbors!");
         // gnumber = admin.groupList.indexOf(base.playerName);
         // neighbors = 
+        console.log("pollution leaaaakk");
         for (n in base.neighbors){
-          Games.update({$and: [{"gameCode": gameCode}, {"role": "base"}, {"playerName": base.neighbors[n]}]}, {$inc: {"pollution": pollLeak}});  
+          console.log("hitting the neighbs");
+          Games.update({$and: [{"gameCode": gameCode}, {"role": "base"}, {"playerName": base.neighbors[n]}]}, {$inc: {"pollution": pollLeak}}, {$push: {"notes": "A neighbor leaked pollution on to you!"}});  
           roundNotes.push("High pollution, leaked " + pollLeak + " pollution to " + base.neighbors[n]);
         }
         
       }
 
       Games.update({"_id": base._id}, {$set: {"res": res, "pollution": newpoll, "happiness": newhapp, "population": newpop, "roundNotes": roundNotes}});
+    }
       // RunBids
       // History.insert({"time": new Date().getTime(), "city": city.name, "cityid": city._id, "res": res, "pollution": newpoll, "happiness": newhapp, "population": newpop});
-    });
+    // });
+  }
+});
+
+export const AddTeamNote = new ValidatedMethod({
+  name: 'notes.teamadd',
+  validate ({}) {},
+  run({gameCode, baseId, notes}) {
+    Games.update({$and: [{"gameCode": gameCode}, {"playerId": baseId}]}, {$push: {"roundNotes": {$each: notes}}});
+  }
+});
+
+export const ResetFactoryNotes = new ValidatedMethod({
+  name: 'resetnotes.factory',
+  validate ({}) {},
+  run({gameCode}) {
+    Producers.update({"gameCode": gameCode}, {$set: {"roundNotes": [], "roundRun": false}});
+  }
+});
+
+export const ResetTeamNotes = new ValidatedMethod({
+  name: 'resetnotes.team',
+  validate ({}) {},
+  run({gameCode}) {
+    Games.update({"gameCode": gameCode}, {$set: {"roundNotes": [], "roundRun": false}});
   }
 });
 
@@ -363,6 +386,12 @@ export const NewRound = new ValidatedMethod({
   name: 'newRound',
   validate ({}) {},
   run({gameCode, producerCount = 3}) {
+    //reset factory notes, and team notes
+
+    ResetFactoryNotes.call({"gameCode": gameCode});
+
+    ResetTeamNotes.call({"gameCode": gameCode});
+
     ConsumeResources.call({}, (err, res) => {
       if (err) {console.log(err);}
     });
@@ -582,7 +611,8 @@ export const JoinGame = new ValidatedMethod({
           "res": {"m1": 2, "m2": 2, "f1": 2, "f2": 2}, 
           "pollution": 0, 
           "population": 5, 
-          "happiness": 5
+          "happiness": 5,
+          "neighbors": neighbors
         }}, {upsert: true});
 
       }

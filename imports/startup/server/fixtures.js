@@ -57,8 +57,8 @@ Meteor.startup(() => {
       password : "abcdefgh",
       profile  : {
           //publicly visible fields like firstname goes here
-          "name": boss,
-          "lastname": man
+          "name": "boss",
+          "lastname": "man"
       }
     });
 
