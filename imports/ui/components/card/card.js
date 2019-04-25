@@ -1,12 +1,15 @@
 import './card.html';
 import { Producers } from '/imports/api/links/links.js';
 import { Bids } from '/imports/api/links/links.js';
+import { Games } from '/imports/api/links/links.js';
 // import { Assets } from '/imports/api/links/links.js';
 import { Meteor } from 'meteor/meteor';
+
 import { NewRound } from '/imports/api/links/methods.js';
 import { BuyProducer } from '/imports/api/links/methods.js';
 import { MakeBid } from '/imports/api/links/methods.js';
-import { Games } from '/imports/api/links/links.js';
+import { UpdateBid } from '/imports/api/links/methods.js';
+
 
 Template.factoryList.onCreated(function helloOnCreated() {
   // counter starts at 0
@@ -158,11 +161,22 @@ Template.factory.helpers({
 
    thisGame = Games.findOne({$and: [{"gameCode": FlowRouter.getParam("gameCode")}, {"playerId": Meteor.userId()}]});
 
-   valtext = ""
+   valtext = "";
+   affordability = true;
    if (bid != undefined){
      valtext = bid.bidVal;
      if (thisGame.res[this.bidKind] < bid.bidVal) {
        valtext += " - Can't Afford!";
+       affordability = false;
+       // console.log(affordability);
+       // console.log(this._id);
+       // UpdateBid.call({"bidId": this._id, "affordability": affordability});
+
+     }
+     else {
+       // console.log(affordability);
+       // console.log(this._id);
+       // UpdateBid.call({"bidId": this._id, "affordability": affordability});
      }
      // console.log(bid.bidVal);
    }
@@ -242,11 +256,12 @@ Template.factory.events({
     console.log(event.target.name);
     val = parseInt(event.target.name);
     thisGroup = Games.findOne({"gameCode": FlowRouter.getParam("gameCode")});
+
     if (thisGroup.role != "base") {
       FlowRouter.go('home');
     }
     else{
-      MakeBid.call({"baseId": Meteor.userId(), "producer": this._id, "group": thisGroup.group, "gameCode": FlowRouter.getParam("gameCode"), "change": val});
+      MakeBid.call({"baseId": Meteor.userId(), "producer": this._id, "group": thisGroup.group, "gameCode": FlowRouter.getParam("gameCode"), "change": val, "bidKind": this.bidKind});
     }
   }
 });

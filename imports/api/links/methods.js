@@ -12,6 +12,7 @@ import { Producers } from './links.js';
 import { Cities } from './links.js';
 import { Bids } from './links.js';
 import { History } from './links.js';
+
 import { ValidatedMethod } from 'meteor/mdg:validated-method';
 
 import { baseUsers } from '../../startup/both/index.js';
@@ -102,6 +103,114 @@ export const RandomProducer = new ValidatedMethod({
   }
 });
 
+export const UpdateBid = new ValidatedMethod({
+  name: 'bids.afford',
+  validate ({}) {},
+  run ({bidId, affordability}) {
+    if (!this.isSimulation){
+      // console.log(bidId + " " + affordability);
+      if (affordability!= undefined){
+        Bids.update(
+          {"_id": bidId}, 
+          {$set: {
+            "affordability": affordability
+            }
+          });
+      }
+      return true;
+    }
+  }
+});
+
+// export const UpdateBid = new ValidatedMethod({
+//   name: 'bids.afford',
+//   validate ({}) {},
+//   run ({bidList}) {
+//     if (!this.isSimulation){
+//       // console.log(bidId + " " + affordability);
+//       if (affordability!= undefined){
+//         Bids.update(
+//           {"_id": bidId}, 
+//           {$set: {
+//             "affordability": affordability
+//             }
+//           });
+//       }
+//       return true;
+//     }
+//   }
+// });
+
+
+
+export const ClearBids = new ValidatedMethod({
+  name: 'bids.clear',
+  validate ({}) {},
+  run ({producer}) {
+    if (!this.isSimulation){
+      // console.log("clearing bids");
+      Bids.update({"producer": producer}, {$set: {"bidVal": 0}});
+    }
+  }
+});
+
+export const RunBids = new ValidatedMethod({
+  name: 'bids.buy',
+  validate ({}) {},
+  // validate ({}) {
+
+  // },
+  run({gameCode}) {
+    // console.log(player + " " + producer);
+
+    if (!this.isSimulation) {
+      Producers.find({$and: [{"gameCode": gameCode}, {"owned": false}]}).forEach(function (prod) {
+        // prodBids = Bids.find({$and: [{"gameCode": gameCode}, {"producer": prod._id}]}).fetch();
+
+        // allBids = Bids.find({$and: [{"gameCode": gameCode}, {"affordability": true}, {"producer": prod._id}]}, {sort: {"bidVal": -1}}).fetch();
+        allBids = Bids.find({$and: [{"gameCode": gameCode}, {"producer": prod._id}]}, {sort: {"bidVal": -1}}).fetch();
+        // maybe write another function to ensure removal of unaffordable bids?
+        //
+        // console.log(allBids);
+        purchased = "not yet";
+        affBids = []
+        for (i in allBids) {
+          bidder = Games.findOne({$and: [{"playerId": allBids[i].baseId}, {"gameCode": gameCode}]});
+          if (bidder.res[allBids[i].bidKind] >= allBids[i].bidVal) {
+            affBids.push(allBids[i]);
+          }
+        }
+        // console.log(affBids);
+
+        for (i in affBids) {
+          if(purchased == "not yet"){
+            if (i < (affBids.length - 1)){
+              if (affBids[i].bidVal == affBids[i + 1].bidVal) {
+                //raise alerts that bid failed!
+                purchased = "bid clash";
+              }
+              else {
+                // bidder = Games.findOne({"_id": allBids[i].baseId});
+                purchased = "bid success";
+                BuyProducer.call({"producer": prod._id, "player": affBids[i].baseId, "gameCode": gameCode, "bid": affBids[i]});
+                purchased = true;
+              }
+            }
+            else {
+              purchased = "bid success";
+              BuyProducer.call({"producer": prod._id, "player": affBids[i].baseId, "gameCode": gameCode, "bid": affBids[i]});
+              purchased = true;
+            }
+          }
+        }
+
+        ClearBids.call({"producer": prod._id});
+      });
+    }
+    return true;
+  }
+});
+
 
 export const BuyProducer = new ValidatedMethod({
   name: 'producers.buy',
@@ -109,32 +218,41 @@ export const BuyProducer = new ValidatedMethod({
   // validate ({}) {
 
   // },
-  run({player, producer}) {
+  run({producer, player, gameCode, bid}) {
     console.log(player + " " + producer);
 
     if (!this.isSimulation) {
       prod = Producers.findOne({"_id": producer})
       cost = prod.buyCost;
-      if (Cities.find({"name": player})) { // ***fix syntax here to check for contents
-        thisCity = Cities.findOne({"name": player});
+      thisCity = Games.findOne({$and: [{"playerId": player}, {"gameCode": gameCode}, {"role":"base"}]});
+      if (thisCity) { // ***fix syntax here to check for contents
+        // thisCity = Cities.findOne({"name": player});
         res =  thisCity.res;
-        factCount = thisCity.factoryCount;
+        // factCount = thisCity.factoryCount;
         canbuy = true;
-        newres = res;
-        for (r in cost) {
-          if (cost[r] > res[r]) {
-            canbuy = false;
-          }
-          else {
-            newres[r] = res[r] - cost[r];
-          }
-        }
+        // newres = res;
+        // for (r in cost) {
+        //   if (cost[r] > res[r]) {
+        //     canbuy = false;
+        //   }
+        //   else {
+        //     newres[r] = res[r] - cost[r];
+        //   }
+        // }
+        res[bid.bidKind] = thisCity.res[bid.bidKind] - bid.bidVal;
         if (canbuy == true){
-          factCount[prod.kind] += 1;
-          Producers.update({"_id": producer}, {$set: {"owned": true, "owner": player}});
-          Cities.update({"name": player}, {$set: {"res": res, "factoryCount": factCount}});
-
+          // factCount[prod.kind] += 1;
+          Producers.update({"_id": producer}, {$set: {"owned": true, "ownerId": player}});
+          // Games.update({"name": player}, {$set: {"res": res, "factoryCount": factCount}});
+          Games.update({"_id": thisCity._id}, {$set: {"res": res}});
+          // Meteor.call()
         }
+        else {
+          throw new Error("Wasn't able to afford the purchase!");
+        }
+      }
+      else {
+        throw new Error("Purchase failed, city not found!");
       }
     }
     return true;
@@ -157,7 +275,7 @@ export const ConsumeResources = new ValidatedMethod({
       // factCount = city.factoryCount;
       parks = 0;
       roundNotes = [];
-      Producers.find({$and: [{"owned": true}, {"owner": city.name}]}).forEach(function (prod) {
+      Producers.find({$and: [{"owned": true}, {"ownerId": base._id}]}).forEach(function (prod) {
         efficiency = 1;
         dur = prod.durability;
         // if (factCount[prod.kind] > 1) {
@@ -168,7 +286,7 @@ export const ConsumeResources = new ValidatedMethod({
         for (r in prod.prodCosts) {
           if ((res[r] -  prod.prodCosts[r]) < 0) {
             affordable = false;
-            Producers.update({"_id": prod._id},{$set: {}});
+            // Producers.update({"_id": prod._id},{$set: {}});
           }
         }
         if (affordable == true){
@@ -231,7 +349,8 @@ export const ConsumeResources = new ValidatedMethod({
       }
 
       Games.update({"_id": base._id}, {$set: {"res": res, "pollution": newpoll, "happiness": newhapp, "population": newpop, "roundNotes": roundNotes}});
-      History.insert({"time": new Date().getTime(), "city": city.name, "cityid": city._id, "res": res, "pollution": newpoll, "happiness": newhapp, "population": newpop});
+      // RunBids
+      // History.insert({"time": new Date().getTime(), "city": city.name, "cityid": city._id, "res": res, "pollution": newpoll, "happiness": newhapp, "population": newpop});
     });
   }
 });
@@ -239,10 +358,12 @@ export const ConsumeResources = new ValidatedMethod({
 export const NewRound = new ValidatedMethod({
   name: 'newRound',
   validate ({}) {},
-  run({gameCode, producerCount = 6}) {
+  run({gameCode, producerCount = 3}) {
     ConsumeResources.call({}, (err, res) => {
       if (err) {console.log(err);}
     });
+
+    RunBids.call({"gameCode": gameCode});
 
     // FlushProducers.call({"gameCode": gameCode}, (err, res) => {
     //   if (err) {console.log(err);}
@@ -479,7 +600,7 @@ function ConsumeResources() {
 export const MakeBid = new ValidatedMethod({
   name: 'bid.make',
   validate({}) {},
-  run({baseId, producer, group, gameCode, change}) {
+  run({baseId, producer, group, gameCode, change, bidKind}) {
     if (!this.isSimulation) {
       var existBid = Bids.findOne({$and: [{"producer": producer}, {"group": group}]});
       if (existBid == undefined) {
@@ -491,7 +612,8 @@ export const MakeBid = new ValidatedMethod({
           "group": group,
           "gameCode": gameCode,
           "baseId": baseId,
-          "bidVal": change
+          "bidVal": change,
+          "bidKind": bidKind
         });
       }
       else {

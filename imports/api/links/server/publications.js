@@ -19,7 +19,7 @@ Meteor.publish('producers.public', function () {
 });
 
 Meteor.publish('producers.owned', function () {
-  return Producers.find({"owner": Meteor.userId()});
+  return Producers.find({"ownerId": Meteor.userId()});
   //figure this shit out
   // if (!this.userId) {
   //   return this.ready();
