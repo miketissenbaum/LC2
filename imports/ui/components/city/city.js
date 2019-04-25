@@ -140,7 +140,7 @@ Template.cityFactory.helpers({
       "pollution": "../img/icons/pollution_sml.png"
     };
     for (r in costList) {
-     console.log(r + " " + factoryOutputType[r]);
+     // console.log(r + " " + factoryOutputType[r]);
       if (costList[r] != 0 && costList[r] != undefined) {
        // costText += costList[r] + " " + r + ", ";
 

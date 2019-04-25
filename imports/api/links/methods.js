@@ -193,6 +193,8 @@ export const RunBids = new ValidatedMethod({
               if (affBids[i].bidVal == affBids[i + 1].bidVal) {
                 //raise alerts that bid failed!
                 purchased = "bid clash";
+                AddTeamNote.call({"gameCode": gameCode, "baseId": addBids[i].baseId, "notes": ["Bid failed cause it clashed with someone else!"]})
+                AddTeamNote.call({"gameCode": gameCode, "baseId": addBids[i + 1].baseId, "notes": ["Bid failed cause it clashed with someone else!"]})
                 console.log("bid clash");
               }
               else {
@@ -261,7 +263,11 @@ export const ConsumeResources = new ValidatedMethod({
   run ({gameCode}) {
     // city = Cities.findOne({"name": prod["owner"]});
     admin = Games.findOne({$and: [{"gameCode": gameCode}, {"role": "admin"}]});
-    Games.find({$and: [{"gameCode": gameCode}, {"role": "base"}]}).forEach(function (base) {
+    allBases = Games.find({$and: [{"gameCode": gameCode}, {"role": "base"}]}).fetch();
+    ResetFactoryNotes.call({gameCode});
+
+    for (b in allBases){
+      base = allBases[b];
       res = base.res;
       newpoll = parseInt(base.pollution) ;
       newpop = parseInt(base.population);
@@ -269,11 +275,12 @@ export const ConsumeResources = new ValidatedMethod({
       freshFactCount = {"m1": 0, "m2": 0, "f1": 0, "f2": 0, "p1": 0, "p2": 0};
       // factCount = city.factoryCount;
       parks = 0;
-      roundNotes = [];
-      // console.log(base.playerId);
+      roundNotes = base.roundNotes;
+      // console.log("base " + base.playerId);
       // console.log(Producers.find({"owned": true}).fetch());
-      allProds = Producers.find({$and: [{"gameCode": gameCode}, {"owned": true}, {"ownerId": base.playerId}, {"roundRun": false}]}).fetch()
-      affordableProds = []
+      allProds = Producers.find({$and: [{"gameCode": gameCode}, {"owned": true}, {"ownerId": base.playerId}]}).fetch()
+      affordableProds = [];
+      // console.log(allProds);
       for (p in allProds){
         prod = allProds[p];
         affordable = true;
@@ -282,6 +289,7 @@ export const ConsumeResources = new ValidatedMethod({
             affordable = false;
           }
         }
+
         console.log(affordable + " " + prod._id);
         if (affordable == true) {
           for (r in prod.prodCosts) {
@@ -289,63 +297,23 @@ export const ConsumeResources = new ValidatedMethod({
           }
           for (r in prod.prodValues) {
             if (r != "pollution"){
-              res[r] += Math.round(prod.prodValues[r] * efficiency);
+              res[r] += Math.round(prod.prodValues[r]);
             }
             else {
               newpoll = newpoll + prod.prodValues[r];
             }
           }
-          Producers.update({_id: prod._id}, {$set: {"roundNotes": ["Run successful!"], "roundRun": true}});
+          Producers.update({_id: prod._id}, {$set: {"roundNotes": ["Run successful!"], "roundRun": true}}, {multi: false});
         }
         else {
           dur = prod.durability + 1;
-          Producers.update({_id: prod._id}, {$set: {"durability": dur, "roundNotes": ["Lack of resources to run!"], "roundRun": true}});
+          Producers.update({_id: prod._id}, {$set: {"durability": dur, "roundNotes": ["Lack of resources to run!"], "roundRun": true}}, {multi: false});
         }
         freshFactCount[prod.kind] += 1;
         if (prod.kind == "p1" || prod.kind == "p1") {
           parks += 1;
         }
       }
-        // console.log("running producer " + prod._id);
-        // efficiency = 1;
-        // dur = prod.durability;
-        // if (factCount[prod.kind] > 1) {
-        //   efficiency = 1.3;
-        // }
-
-        // affordable = true;
-        // for (r in prod.prodCosts) {
-        //   if ((res[r] -  prod.prodCosts[r]) < 0) {
-        //     affordable = false;
-        //     // console.log("factory not affordable")
-        //     // Producers.update({"_id": prod._id},{$set: {}});
-        //     Producers.update({_id: prod._id}, {$set: {"durability": dur, "roundNotes": ["Lack of resources to run!"], "roundRun": true}});
-        //   }
-        // }
-        
-
-        // if (affordable == true){
-        //   for (r in prod.prodCosts) {
-        //     res[r] -= prod.prodCosts[r];
-        //   }
-        //   for (r in prod.prodValues) {
-        //     if (r != "pollution"){
-        //       res[r] += Math.round(prod.prodValues[r] * efficiency);
-        //     }
-        //     else {
-        //       newpoll = newpoll + prod.prodValues[r];
-        //     }
-        //   }
-        //   console.log("having run " + prod._id + " setting to successful");
-
-        //   Producers.update({_id: prod._id}, {$set: {"roundNotes": ["Run successful!"], "roundRun": true}});
-        // }
-        // else {
-        //   dur += 1;
-        //   Producers.update({_id: prod._id}, {$set: {"durability": dur, "roundNotes": ["Lack of resources to run!"], "roundRun": true}});
-        // }
-        
-      // });
 
       if ((res.f1 + res.f2) / newpoll > 2) {
         newpop = newpop + 1;
@@ -373,17 +341,28 @@ export const ConsumeResources = new ValidatedMethod({
         // roundNotes.push("High pollution, leaking onto neighbors!");
         // gnumber = admin.groupList.indexOf(base.playerName);
         // neighbors = 
+        console.log("pollution leaaaakk");
         for (n in base.neighbors){
-          Games.update({$and: [{"gameCode": gameCode}, {"role": "base"}, {"playerName": base.neighbors[n]}]}, {$inc: {"pollution": pollLeak}});  
+          console.log("hitting the neighbs");
+          Games.update({$and: [{"gameCode": gameCode}, {"role": "base"}, {"playerName": base.neighbors[n]}]}, {$inc: {"pollution": pollLeak}}, {$push: {"notes": "A neighbor leaked pollution on to you!"}});  
           roundNotes.push("High pollution, leaked " + pollLeak + " pollution to " + base.neighbors[n]);
         }
         
       }
 
       Games.update({"_id": base._id}, {$set: {"res": res, "pollution": newpoll, "happiness": newhapp, "population": newpop, "roundNotes": roundNotes}});
+    }
       // RunBids
       // History.insert({"time": new Date().getTime(), "city": city.name, "cityid": city._id, "res": res, "pollution": newpoll, "happiness": newhapp, "population": newpop});
-    });
+    // });
+  }
+});
+
+export const AddTeamNote = new ValidatedMethod({
+  name: 'notes.teamadd',
+  validate ({}) {},
+  run({gameCode, baseId, notes}) {
+    Games.update({$and: [{"gameCode": gameCode}, {"playerId": baseId}]}, {$push: {"roundNotes": {$each: notes}}});
   }
 });
 
@@ -391,7 +370,7 @@ export const ResetFactoryNotes = new ValidatedMethod({
   name: 'resetnotes.factory',
   validate ({}) {},
   run({gameCode}) {
-    Producers.update({"gameCode": gameCode}, {$set: {"notes": [], "roundRun": false}});
+    Producers.update({"gameCode": gameCode}, {$set: {"roundNotes": [], "roundRun": false}});
   }
 });
 
@@ -399,7 +378,7 @@ export const ResetTeamNotes = new ValidatedMethod({
   name: 'resetnotes.team',
   validate ({}) {},
   run({gameCode}) {
-    Games.update({"gameCode": gameCode}, {$set: {"notes": [], "roundRun": false}});
+    Games.update({"gameCode": gameCode}, {$set: {"roundNotes": [], "roundRun": false}});
   }
 });
 
@@ -632,7 +611,8 @@ export const JoinGame = new ValidatedMethod({
           "res": {"m1": 2, "m2": 2, "f1": 2, "f2": 2}, 
           "pollution": 0, 
           "population": 5, 
-          "happiness": 5
+          "happiness": 5,
+          "neighbors": neighbors
         }}, {upsert: true});
 
       }
