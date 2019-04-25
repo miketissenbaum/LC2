@@ -1,6 +1,17 @@
 <template name="cityStates">
 
-  <table id="gameScoreboard">
+  <table id="gameScoreboard" class="table">
+    <thead>
+      <tr>
+        <th> City </th>
+        <th colspan="4"> Resources </th>
+        <th> Pollution </th>
+        <th> Population </th>
+        <th> Happiness </th>
+        <th> Neighbors </th>
+      </tr>
+    </thead>
+    <tbody>
   	{{#each cities}}  
 	    <tr class="scoreboardRow">
 	    	<td class="teamName">{{playerName}}</td>
@@ -14,6 +25,7 @@
       <td> {{#each neighbors}} {{this}}, {{/each}} </td>
 		</tr>
 	  	{{/each}}
+    </tbody>
 	</table>
 
 </template>
