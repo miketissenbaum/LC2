@@ -1,13 +1,18 @@
 <template name="cityStates">
-  {{#each cities}}  
-    {{playerName}}
-    Pollution: {{pollution}}
-    Population: {{population}}
-    Happiness: {{happiness}}
-    Stocks: m1: {{res.m1}}; f1: {{res.f1}}, m2: {{res.m2}}, f2: {{res.f2}}
-    <br />
-  {{/each}}
-
+  <table id="gameScoreboard">
+  	{{#each cities}}  
+	    <tr class="scoreboardRow">
+	    	<td class="teamName">{{playerName}}</td>
+	    	<td><img class="cityIcon" src="../../img/icons/gold_sml.png"> {{res.m1}}</td>
+	    	<td><img class="cityIcon" src="../../img/icons/steel_sml.png">  {{res.m2}}</td>
+	   		<td><img class="cityIcon" src="../../img/icons/food_sml.png"> {{res.f1}}  </td>
+	    	<td><img class="cityIcon" src="../../img/icons/cotton_sml.png"> {{res.f2}} </td>
+	  		<td><img class="cityIcon" src="../../img/icons/pollution_med.png"> {{pollution}}</td> 
+			<td><img class="cityIcon" src="../../img/icons/population_med.png"> {{population}} </td>
+			<td><img class="cityIcon" src="../../img/icons/happiness_med.png"> {{happiness}}</td>
+		</tr>
+	  	{{/each}}
+	</table>
 </template>
 
 

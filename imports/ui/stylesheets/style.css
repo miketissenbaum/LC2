@@ -188,4 +188,13 @@ body {
     max-width: 32%;
 }*/
 
+.scoreboardRow {
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+    border-bottom: solid black 1px;
+}
 
+.teamName {
+	width: 100px;
+}
