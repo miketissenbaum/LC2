@@ -70,9 +70,23 @@
 </template>
 
 <template name="cityFactory">
-  You have a {{kind}} producer. <br />
-  Produces:{{productionValues}} <br />
-  While using: {{productionCosts}}
+  <div class="factoryInfo">
+      <img class="factoryIcon" src="{{factoryIcon}}">
+      <!-- {{> factory}} -->
+  </div>
+  <div id="productionValues">
+    <span class="productionLabel">Produces</span>
+    {{{CostInfo this.prodValues ""}}} 
+  </div>
+  <br />
+  <div id="consuptionValue">
+    <span class="productionLabel">Consumes</span>
+    {{{CostInfo this.prodCosts ""}}}
+  </div>
+<!--   <div id="consuptionValue">
+    <span class="productionLabel">Consumes</span>
+    {{{CostInfo this.prodCosts ""}}}
+  </div> -->
   {{#each productionRes}}
     <!-- <p> item </p> -->
    {{#each resValArr}}

@@ -111,7 +111,7 @@ Template.cityFactory.helpers({
    // return Producers.find({$and: [{"owned": true}, {"owner": this.name}]});
  },
 
- productionValues() {
+  productionValues() {
     prodText = "";
 
     // console.log(this.prodValues);
@@ -128,6 +128,35 @@ Template.cityFactory.helpers({
 
     // return Producers.find({$and: [{"owned": true}, {"owner": this.name}]});
   },
+
+  CostInfo(costList, startText) {
+    // CostInfo() {
+     costText = "";
+     factoryOutputType = {
+      "m1": "../img/icons/gold_sml.png",
+      "f1": "../img/icons/food_sml.png",
+      "m2": "../img/icons/steel_sml.png",
+      "f2": "../img/icons/cotton_sml.png",
+      "pollution": "../img/icons/pollution_sml.png"
+    };
+    for (r in costList) {
+     console.log(r + " " + factoryOutputType[r]);
+      if (costList[r] != 0 && costList[r] != undefined) {
+       // costText += costList[r] + " " + r + ", ";
+
+      costText += costList[r];
+      costText += '<img class="resourceIcon" src="' + factoryOutputType[r] + '" />';
+      }
+    }
+
+  if (costText != "") {
+     costText = startText + "<br />" + costText;
+   }
+   else {
+     costText = '<br/> <img class="resourceIcon" src="../img/icons/blank.png" </br>';
+   }
+   return costText;
+  },
   
   productionCosts() {
     costText = "";
@@ -141,6 +170,20 @@ Template.cityFactory.helpers({
     // console.log(costText);
 
     return costText;
+  },
+
+    factoryIcon() {
+    factoryIconSource = {
+      "p1": "../img/icons/park_med.png",
+      "p2": "../img/icons/park_med.png",
+      "m1": "../img/icons/factory_med.png",
+      "m2": "../img/icons/factory_med.png",
+      "f1": "../img/icons/farm_med.png",
+      "f2": "../img/icons/farm_med.png"
+    }
+    // console.log(this);
+    // console.log(factoryIconSource[this.kind]);
+    return factoryIconSource[this.kind];
   },
 
   // FactoryNotes() {
