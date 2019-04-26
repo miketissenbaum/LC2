@@ -46,9 +46,10 @@ Template.trade.events({
     else {
       TradeResources.call({"amount": parseInt(val), "resource": res, "from": from, "to": to}, (err, res) => {
         if (err) {
-          alert(err);
+          alert(err.error);
+          console.log(err);
         } else {
-          alert("sent!");
+          alert("Sent!");
         }
       });
     }

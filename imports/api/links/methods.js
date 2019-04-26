@@ -193,8 +193,8 @@ export const RunBids = new ValidatedMethod({
               if (affBids[i].bidVal == affBids[i + 1].bidVal) {
                 //raise alerts that bid failed!
                 purchased = "bid clash";
-                AddTeamNote.call({"gameCode": gameCode, "baseId": addBids[i].baseId, "notes": ["Bid failed cause it clashed with someone else!"]})
-                AddTeamNote.call({"gameCode": gameCode, "baseId": addBids[i + 1].baseId, "notes": ["Bid failed cause it clashed with someone else!"]})
+                AddTeamNote.call({"gameCode": gameCode, "baseId": affBids[i].baseId, "notes": ["Bid failed cause it clashed with someone else!"]})
+                AddTeamNote.call({"gameCode": gameCode, "baseId": affBids[i + 1].baseId, "notes": ["Bid failed cause it clashed with someone else!"]})
                 console.log("bid clash");
               }
               else {
@@ -324,7 +324,7 @@ export const ConsumeResources = new ValidatedMethod({
           roundNotes.push("Satisfactory food, gained population!");
         }
 
-        else if ((res.f1 + res.f2) / newpoll < 0.8) {
+        else if ((res.f1 + res.f2) / newpoll < 0.5) {
           newpop = newpop - 1;
           roundNotes.push("Lack of food, lost population!");
         }
@@ -342,23 +342,26 @@ export const ConsumeResources = new ValidatedMethod({
 
         if (newpoll > 6) {
           pollLeak = Math.floor( (newpoll - 3 ) / 3);
+          pollLeak = parseInt(pollLeak);
+          console.log("leaking pollution " + pollLeak);
           // roundNotes.push("High pollution, leaking onto neighbors!");
           // gnumber = admin.groupList.indexOf(base.playerName);
           // neighbors = 
           // console.log("pollution leaaaakk");
-          for (n in base.neighbors){
-            
-            if (pollLeak > 0){
+          if (pollLeak > 0){
+            for (n in base.neighbors){
               // console.log("hitting the neighbs " + base.neighbors[n]) + " " + pollLeak;
               neighGame = Games.findOne({$and: [{"gameCode": gameCode}, {"role": "base"}, {"playerName": base.neighbors[n]}]})
-              console.log(neighGame.pollution);
+              console.log("neighbor pollution " + parseInt(neighGame.pollution));
               // console.log(Games.findOne({$and: [{"gameCode": gameCode}, {"role": "base"}, {"playerName": base.neighbors[n]}]}));
               // Games.update({$and: [{"gameCode": gameCode}, {"role": "base"}, {"playerName": base.neighbors[n]}]}, {$inc: {"pollution": pollLeak}}, {$push: {"notes": "A neighbor leaked pollution on to you!"}});  
-              Games.update({_id: neighGame._id}, {$set: {"pollution": neighGame.pollution + pollLeak}});
+              Games.update({_id: neighGame._id}, {$set: {"pollution": parseInt(neighGame.pollution) + parseInt(pollLeak)}});
               // console.log(neighGame.pollution);
-              Games.update({_id: neighGame._id}, {$push: {"roundNotes": "A neighbor leaked pollution on to you!"}})
+              // Games.update({_id: neighGame._id}, {$push: {"roundNotes": "A neighbor leaked pollution on to you!"}})
+              AddTeamNote.call({"gameCode": neighGame.gameCode, "baseId": neighGame.playerId, "notes": ["A neighbor leaked pollution on to you!"]})
+              roundNotes.push("High pollution, leaked " + pollLeak + " pollution to " + base.neighbors[n]);
             }
-            // roundNotes.push("High pollution, leaked " + pollLeak + " pollution to " + base.neighbors[n]);
+            
           }
           
         }
@@ -386,7 +389,10 @@ export const AddTeamNote = new ValidatedMethod({
   validate ({}) {},
   run({gameCode, baseId, notes}) {
     if (!this.isSimulation){
-      Games.update({$and: [{"gameCode": gameCode}, {"playerId": baseId}]}, {$push: {"roundNotes": {$each: notes}}}, {multi: true});
+      thisbase = Games.findOne({$and: [{"gameCode": gameCode}, {"playerId": baseId}]});
+      console.log(thisbase.roundNotes);
+      Games.update( {"_id": thisbase._id}, {$push: {"roundNotes": {$each: notes}}} );
+      console.log(Games.findOne({ "_id":thisbase._id }).roundNotes);
     }
   }
 });
@@ -491,7 +497,8 @@ export const TradeResources = new ValidatedMethod({
       }
       else {
         console.log("under resourced");
-        throw new Error("not enough resource!");
+        // throw new Error("not enough resource!");
+        throw new Meteor.Error('Not enough resource!', "Can't find my pants");
       }
     }
   }

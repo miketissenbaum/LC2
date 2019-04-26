@@ -1,33 +1,14 @@
 <template name="cities">
   <table cellpadding="10" class="cityTable">
     <tr >
-      <!-- {{#if notCityView}}
-      	{{#each allCities}}
-          <td width = 50%>
-            {{> city}}
-          </td>
-        {{/each}}
-      {{else}} -->
-        {{#each citySet}}
-          <td class="cityRow">
-            {{> city}}
-          </td>
-        {{/each}}
-      <!-- {{/if}} -->
+      {{#each citySet}}
+        <td class="cityRow">
+          {{> city}}
+        </td>
+      {{/each}}
     </tr>
   </table>
-  
-  <!-- <p>You've pressed the button {{counter}} times.</p> -->
 </template>
-
-<!--<template name="individualCity">
-  {{#each individualCities}}
-    {{> city}}
-  {{/each}}
-   -->
-  <!-- <p>You've pressed the button {{counter}} times.</p> -->
-<!-- </template> -->
-
 
 <template name="city">
   <!-- {{}} -->
@@ -79,12 +60,12 @@
       {{{CostInfo this.prodValues ""}}} 
     </div>
     <br />
-    <div id="consuptionValue">
+    <div id="consumptionValue">
       <span class="productionLabel">Consumes</span>
       {{{CostInfo this.prodCosts ""}}}
     </div>
   </div>
-<!--   <div id="consuptionValue">
+<!--   <div id="consumptionValue">
     <span class="productionLabel">Consumes</span>
     {{{CostInfo this.prodCosts ""}}}
   </div> -->
