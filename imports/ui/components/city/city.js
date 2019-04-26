@@ -6,6 +6,8 @@ import { Meteor } from 'meteor/meteor';
 import { FlowRouter } from 'meteor/kadira:flow-router';
 import '/imports/ui/stylesheets/style.css';
 
+import { ToggleFactory } from '/imports/api/links/methods.js';
+
 // import { NewRound } from '/imports/api/links/methods.js';
 
 Template.cities.onCreated(function helloOnCreated() {
@@ -186,8 +188,30 @@ Template.cityFactory.helpers({
     return factoryIconSource[this.kind];
   },
 
+  runningStatus() {
+    if (this.running == true) {
+      return "Enabled";
+    }
+    else {
+      return "Disabled";
+    }
+  }
+
   // FactoryNotes() {
 
   // }
+});
+
+Template.cityFactory.events({
+  'click .toggleRunning' (event,instance) {
+    event.preventDefault();
+    console.log(instance);
+    console.log(this.running);
+    ToggleFactory.call({"producerId": this._id, "currentStatus": this.running}, function (err, res) {
+      if (err) {
+        console.log(err);
+      }
+    });
+  }
 });
 

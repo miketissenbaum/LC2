@@ -261,6 +261,15 @@ export const BuyProducer = new ValidatedMethod({
   }
 });
 
+export const ToggleFactory = new ValidatedMethod({
+  name: 'producers.toggle',
+  validate ({}) {},
+
+  run ({producerId, currentStatus}) {
+    Producers.update({"_id": producerId}, {$set: {"running": !currentStatus}});
+  }
+});
+
 export const ConsumeResources = new ValidatedMethod({
   name: 'producers.consume',
   validate ({}) {},
@@ -287,7 +296,7 @@ export const ConsumeResources = new ValidatedMethod({
         }
         // console.log("base " + base.playerId);
         // console.log(Producers.find({"owned": true}).fetch());
-        allProds = Producers.find({$and: [{"gameCode": gameCode}, {"owned": true}, {"ownerId": base.playerId}]}).fetch()
+        allProds = Producers.find({$and: [{"gameCode": gameCode}, {"owned": true}, {"ownerId": base.playerId}, {"running": true}]}).fetch()
         affordableProds = [];
         // console.log(allProds);
         for (p in allProds){
@@ -333,7 +342,7 @@ export const ConsumeResources = new ValidatedMethod({
 
         else if ((res.f1 + res.f2) / newpoll < 0.5) {
           newpop = newpop - 1;
-          roundNotes.push("Your people are starving, your city is shrinkng!");
+          roundNotes.push("Your people are starving, your city is shrinking!");
         }
 
         if ((freshFactCount["p1"] + freshFactCount["p2"]*1.0) / newpop  <= 0.2) {
@@ -388,30 +397,28 @@ export const SpreadPollution = new ValidatedMethod({
         // console.log("pollution leaaaakk");
         if (pollLeak > 0){
           for (n in base.neighbors){
-            // console.log("hitting the neighbs " + base.neighbors[n] + " " + pollLeak);
+            console.log("hitting the neighbs " + base.neighbors[n] + " " + pollLeak);
             neighGame = Games.findOne({$and: [{"gameCode": gameCode}, {"role": "base"}, {"playerName": base.neighbors[n]}]});
             console.log(neighGame);
             // console.log("neighbor pollution " + parseInt(neighGame.pollution));
             // console.log(Games.findOne({$and: [{"gameCode": gameCode}, {"role": "base"}, {"playerName": base.neighbors[n]}]}));
             // Games.update({$and: [{"gameCode": gameCode}, {"role": "base"}, {"playerName": base.neighbors[n]}]}, {$inc: {"pollution": pollLeak}}, {$push: {"notes": "A neighbor leaked pollution on to you!"}});  
-            neighborPollution = parseInt(neighGame.pollution) + parseInt(pollLeak);
-            // console.log("new neighbor pollution is " + neighborPollution);
-            Games.update({_id: neighGame._id}, {$inc: {"pollution": pollLeak}});
-            // console.log(neighGame.pollution);
-            // Games.update({_id: neighGame._id}, {$push: {"roundNotes": "A neighbor leaked pollution on to you!"}})
-            AddTeamNote.call({"gameCode": neighGame.gameCode, "baseId": neighGame.playerId, "notes": ["A neighbor leaked pollution on to you!"]}, function (err, res) {
-              if (err) {console.log(err);}
-            leakNote = ["High pollution, leaked " + pollLeak + " pollution to " + base.neighbors[n]];
-            AddTeamNote.call({"gameCode": base.gameCode, "baseId": base.playerId, "notes": leakNote}, function (err, res) {
-              if (err) {console.log(err);}
-            });
-            });
+            if(neighGame != undefined) {
+              neighborPollution = parseInt(neighGame.pollution) + parseInt(pollLeak);
+              // console.log("new neighbor pollution is " + neighborPollution);
+              Games.update({_id: neighGame._id}, {$inc: {"pollution": pollLeak}});
+              // console.log(neighGame.pollution);
+              // Games.update({_id: neighGame._id}, {$push: {"roundNotes": "A neighbor leaked pollution on to you!"}})
+              AddTeamNote.call({"gameCode": neighGame.gameCode, "baseId": neighGame.playerId, "notes": ["A neighbor leaked pollution on to you!"]}, function (err, res) {
+                if (err) {console.log(err);}})
 
+              leakNote = ["High pollution, leaked " + pollLeak + " pollution to " + base.neighbors[n]];
+              AddTeamNote.call({"gameCode": base.gameCode, "baseId": base.playerId, "notes": leakNote}, function (err, res) {
+                if (err) {console.log(err);} });
+            }
             // roundNotes.push("High pollution, leaked " + pollLeak + " pollution to " + base.neighbors[n]);
           }
-          
         }
-
       }
     }
   }
@@ -532,7 +539,7 @@ export const TradeResources = new ValidatedMethod({
       else {
         console.log("under resourced");
         // throw new Error("not enough resource!");
-        throw new Meteor.Error('Not enough resource!', "Can't find my pants");
+        throw new Meteor.Error('Not enough resource!!', "Can't find my pants");
       }
     }
   }

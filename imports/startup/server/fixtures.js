@@ -2,6 +2,7 @@
 
 import { Meteor } from 'meteor/meteor';
 import { Links } from '../../api/links/links.js';
+import { Producers } from '../../api/links/links.js';
 import { baseUsers } from '../both/index.js';
 
 basePass = "battery-honey-possible";
@@ -64,5 +65,7 @@ Meteor.startup(() => {
 
   }
   // }
+  // add running field to producer
+  Producers.update({"running": {$exists: false}}, {$set: {"running": true}}, {multi: true});
 
 });

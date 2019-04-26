@@ -30,7 +30,7 @@ Template.trade.helpers({
 });
 
 Template.trade.events({
-  'submit .trade'(event, instance) {
+  'submit .trade' (event, instance) {
     gCode = FlowRouter.getParam("gameCode");
     event.preventDefault();
     val = event.target.amount.value;

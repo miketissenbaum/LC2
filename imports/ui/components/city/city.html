@@ -65,16 +65,11 @@
       {{{CostInfo this.prodCosts ""}}}
     </div>
   </div>
-<!--   <div id="consumptionValue">
-    <span class="productionLabel">Consumes</span>
-    {{{CostInfo this.prodCosts ""}}}
-  </div> -->
-  {{#each productionRes}}
-    <!-- <p> item </p> -->
-   {{#each resValArr}}
-     <!-- <p>test</p> -->
-   {{/each}}
-  {{/each}}<br />
+  
+  <br />
+  <button type="button" class="btn btn-outline-primary toggleRunning" data-toggle="button" aria-pressed="false" autocomplete="off">
+    {{runningStatus}}
+  </button>
   <div class="cityFacotryNotes">
   Notes: {{#each roundNotes}}  {{this}} <br />   {{/each}}
   </div>
