@@ -1,0 +1,11 @@
+build steps
+
+npm install production
+meteor build ../lc2build --architecture os.linux.x86_64
+cd ../lc2build
+tar xzf LC2.tar.gz
+cd bundle
+(cd programs/server && npm install)
+export PORT=8011
+MONGO_URL=mongodb://localhost:27017/lc2 ROOT_URL=http://my-app.com node main.js
+

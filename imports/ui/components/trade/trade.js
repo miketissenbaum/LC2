@@ -13,7 +13,11 @@ Template.trade.onCreated(function helloOnCreated() {
 
 Template.trade.helpers({
   resource() {
-    return [{"name": "m1"}, {"name": "m2"}, {"name": "f1"}, {"name": "f2"}];
+    return [
+      {"name": "m1", "displayName": "Gold"}, 
+      {"name": "m2", "displayName": "Steel"}, 
+      {"name": "f1", "displayName": "Food"}, 
+      {"name": "f2", "displayName": "Cotton"}];
   },
   otherPlayers() {
     gCode = FlowRouter.getParam("gameCode");
@@ -43,6 +47,8 @@ Template.trade.events({
       TradeResources.call({"amount": parseInt(val), "resource": res, "from": from, "to": to}, (err, res) => {
         if (err) {
           alert(err);
+        } else {
+          alert("sent!");
         }
       });
     }
