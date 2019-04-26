@@ -12,6 +12,7 @@ import { Producers } from './links.js';
 import { Cities } from './links.js';
 import { Bids } from './links.js';
 import { History } from './links.js';
+import { Acts } from './links.js';
 
 import { ValidatedMethod } from 'meteor/mdg:validated-method';
 
@@ -267,8 +268,28 @@ export const ToggleFactory = new ValidatedMethod({
 
   run ({producerId, currentStatus}) {
     Producers.update({"_id": producerId}, {$set: {"running": !currentStatus}});
+    Acts.insert({
+      "time": (new Date()).getTime(),
+      "key": "factoryToggle",
+      "producerId": producerId,
+      "pastStatus": currentStatus,
+      "newStatus": !currentStatus
+    })
   }
 });
+
+export const MakeLog = new ValidatedMethod({
+  name: 'logs.add',
+  validate ({}) {},
+
+  run ({key, log}) {
+    log["key"] = key;
+    log["time"] = (new Date()).getTime();
+    Acts.insert({
+      log
+    });
+  }
+})
 
 export const ConsumeResources = new ValidatedMethod({
   name: 'producers.consume',
@@ -364,8 +385,17 @@ export const ConsumeResources = new ValidatedMethod({
         if (newpop < 0) {
           newpop = 0;
         }
-
-        Games.update({"_id": base._id}, {$set: {"res": res, "pollution": newpoll, "happiness": newhapp, "population": newpop, "roundNotes": roundNotes}});
+        newStats = {
+          "res": res,
+          "pollution": newpoll,
+          "happines": newhapp,
+          "population": newpop,
+          "roundNotes": roundNotes
+        }
+        Games.update({"_id": base._id}, {$set: newStats});
+        newStats["baseID"] = base._id;
+        MakeLog.call({"key": "cityUpdate", "log": newStats})
+        
       }
 
       SpreadPollution.call({"gameCode": gameCode}, function (err, res) {
@@ -527,18 +557,22 @@ export const TradeResources = new ValidatedMethod({
       fromres = fromGroup.res;
       toGroup = Games.findOne({$and: [{"gameCode": to.gameCode},  {"group": to.group}, {"role": "base"}]});
       tores = toGroup.res;
-
+      logObj = {"from": from, "to": to, "amount": amount, "resource":res};
       // tores = Cities.findOne({"name": to}).res;
       if(parseInt(fromres[resource]) >= amount){
         fromres[resource] = parseInt(fromres[resource]) - parseInt(amount);
         tores[resource] = parseInt(tores[resource]) +  parseInt(amount);
         Games.update({"_id": fromGroup._id}, {$set: {"res": fromres}});
         Games.update({"_id": toGroup._id}, {$set: {"res": tores}});
-        return true
+        logObj["success"] = true;
+        MakeLog.call({"key": "tradeResource", "log": logObj});
+        return true;
       }
       else {
         console.log("under resourced");
         // throw new Error("not enough resource!");
+        logObj["success"] = false;
+        MakeLog.call({"key": "tradeResource", "log": logObj});
         throw new Meteor.Error('Not enough resource!!', "Can't find my pants");
       }
     }
@@ -742,6 +776,17 @@ export const MakeBid = new ValidatedMethod({
         }
         Bids.update({"_id": existBid._id}, {$set: {"bidVal": change}});
       }
+      logObj = {
+        "baseId": baseId,
+        "producer": producer,
+        "group": group,
+        "gameCode": gameCode,
+        "value": change,
+        "bidKind": bidKind
+      };
+      MakeLog.call({"key": "BidAct", "log": logObj}, function (err, res) {
+        if (err) {console.log(err);}
+      });
       
       // Bids.update( {"gameCode": FlowRouter.getParam("gameCode")})
 
