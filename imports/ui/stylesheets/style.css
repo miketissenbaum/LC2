@@ -143,6 +143,7 @@ td {
   font-weight: bold;
   float: left;
   margin: 5px;
+  border-top: none !important;
 }
 
 button {
@@ -199,4 +200,15 @@ body {
 
 .teamName {
 	width: 100px;
+}
+
+.row {
+	margin-top: 10px;
+    margin-bottom: 10px;
+    /*border: solid;*/
+}
+
+.vcenter {
+    display: flex;
+    align-items: center;
 }

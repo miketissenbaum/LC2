@@ -1,9 +1,31 @@
 <template name="factoryList">
-  <table cellpadding="10">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-12" style="text-align: center; font-size:18px; "> Marketplace </div>
+    </div>
+    {{#each bidKinds}}
+      <div class="row vcenter">
+        <div class="col-md-2 "><img src="{{ResourceIcon this}}" /></div>
+        <div class="col-md-10">
+          {{#each PublicFactories this}}
+            <div class="col-md-3 col-xs-3" bgcolor="{{factoryColor}}" >
+              <div class="factoryInfo" style="border: solid black 2px; padding: 5px; background: {{factoryBidColor}}" >
+                <img class="factoryIcon" src="{{factoryIcon}}">
+                {{> factory}}
+              </div>
+            </div>
+          {{/each}}
+        </div>
+        </div> 
+      {{/each}}
+    </div>
+  </template>
+
+<!--   <table cellpadding="10">
     <tr><h3 id="marketHeader"> Marketplace </h3></tr>
     {{#each bidKinds}}
       <tr>
-        <td width="200px" class="marketType"> <img src="{{ResourceIcon this}}" /> </td>
+        <td class="marketType"> <img src="{{ResourceIcon this}}" /> </td>
       	{{#each PublicFactories this}}
           <td bgcolor="{{factoryColor}}" class="factoryCards">
             <div class="factoryInfo">
@@ -14,11 +36,11 @@
         {{/each}}
       </tr>
     {{/each}}
-  </table>
+  </table> -->
   <!-- <button class="newRound">Next Round</button> -->
   <!-- <p>You've pressed the button {{counter}} times.</p> -->
   <!-- <button class="toggleCity">{{CurrentCity}} - Toggle selection</button> -->
-</template>
+
 
 
 <template name="factory">

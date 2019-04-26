@@ -43,7 +43,12 @@ Template.factoryList.helpers({
   PublicFactories(bidKind) {
     // console.log((Producers.find({})).toArray());
     // console.log(bidKind);
-    return Producers.find({$and: [{"gameCode": FlowRouter.getParam("gameCode")}, {"owned": false}, {"visible": true}, {"bidKind": bidKind}]});
+    prods = Producers.find({$and: [{"gameCode": FlowRouter.getParam("gameCode")}, {"owned": false}, {"visible": true}, {"bidKind": bidKind}]}).fetch();
+    // while (prods.length < 4) {
+    //   prods.push({});
+    // }
+    return prods;
+    // return Producers.find({$and: [{"gameCode": FlowRouter.getParam("gameCode")}, {"owned": false}, {"visible": true}, {"bidKind": bidKind}]});
   },
 
   ResourceIcon(res) {
@@ -57,6 +62,26 @@ Template.factoryList.helpers({
     return factoryOutputType[res];
   },
 
+  factoryBidColor() {
+    producerColors = {
+      // "p1": "#BBFF99",
+      // "p2": "#BBFF99",
+      // "m1": "#C6C6DB",
+      // "m2": "#C6C6DB",
+      // "f1": "#ee8673",
+      // "f2": "#FFFF80",
+      "p1": "#BBFF99",
+      "p2": "#BBFF99",
+      "m1": "rgba(249,208,115,0.3)",
+      "m2": "rgba(126,154,207,0.3)",
+      "f1": "rgba(238,134,115,0.3)",
+      "f2": "rgba(190,219,139,0.3)"
+    }
+    // console.log(this);
+    return producerColors[this.bidKind];
+    // return this;
+  },
+
   factoryColor() {
     producerColors = {
       "p1": "#BBFF99",
@@ -66,7 +91,7 @@ Template.factoryList.helpers({
       "f1": "#FFFF80",
       "f2": "#FFFF80"
     }
-    // console.log(this);
+    console.log(this);
     return producerColors[this.kind];
     // return this;
   },
