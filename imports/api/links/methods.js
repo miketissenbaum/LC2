@@ -176,7 +176,7 @@ export const RunBids = new ValidatedMethod({
         affBids = []
         for (i in allBids) {
           bidder = Games.findOne({$and: [{"playerId": allBids[i].baseId}, {"gameCode": gameCode}]});
-          if (bidder.res[allBids[i].bidKind] >= allBids[i].bidVal) {
+          if (bidder.res[allBids[i].bidKind] >= allBids[i].bidVal && allBids[i].bidVal > 0) {
             affBids.push(allBids[i]);
           }
         }
@@ -201,14 +201,19 @@ export const RunBids = new ValidatedMethod({
                 // bidder = Games.findOne({"_id": allBids[i].baseId});
                 purchased = "bid success";
                 console.log("bid success cause top bid led");
-                BuyProducer.call({"producer": prod._id, "player": affBids[i].baseId, "gameCode": gameCode, "bid": affBids[i]});
+                BuyProducer.call({"producer": prod._id, "player": affBids[i].baseId, "gameCode": gameCode, "bid": affBids[i]}, function (err, res){
+                  if (err) {console.log(res);}
+                });
+                AddTeamNote.call({"gameCode": gameCode, "baseId": affBids[i].baseId, "notes": ["Your bid succeeded!"]})
                 purchased = true;
               }
             }
             else {
               console.log("bid success cause only 1 bid");
               purchased = "bid success";
-              BuyProducer.call({"producer": prod._id, "player": affBids[i].baseId, "gameCode": gameCode, "bid": affBids[i]});
+              BuyProducer.call({"producer": prod._id, "player": affBids[i].baseId, "gameCode": gameCode, "bid": affBids[i]}, function (err, res){
+                if (err) {console.log(res);}
+              });
               purchased = true;
             }
           }
@@ -307,7 +312,9 @@ export const ConsumeResources = new ValidatedMethod({
                 newpoll = newpoll + prod.prodValues[r];
               }
             }
-            Producers.update({_id: prod._id}, {$set: {"roundNotes": ["Run successful!"], "roundRun": true}}, {multi: false});
+            Producers.update({_id: prod._id}, {$set: {"roundNotes": ["Run successful!"], "roundRun": true}}, {multi: false}, function (err, res){
+              if (err) {console.log(res);}
+            });
           }
           else {
             dur = prod.durability + 1;
@@ -339,32 +346,6 @@ export const ConsumeResources = new ValidatedMethod({
           newpop = newpop - 1;
           roundNotes.push("Everybody's too sad, people leaving!");
         }
-
-        if (newpoll > 6) {
-          pollLeak = Math.floor( (newpoll - 3 ) / 3);
-          pollLeak = parseInt(pollLeak);
-          console.log("leaking pollution " + pollLeak);
-          // roundNotes.push("High pollution, leaking onto neighbors!");
-          // gnumber = admin.groupList.indexOf(base.playerName);
-          // neighbors = 
-          // console.log("pollution leaaaakk");
-          if (pollLeak > 0){
-            for (n in base.neighbors){
-              // console.log("hitting the neighbs " + base.neighbors[n]) + " " + pollLeak;
-              neighGame = Games.findOne({$and: [{"gameCode": gameCode}, {"role": "base"}, {"playerName": base.neighbors[n]}]})
-              console.log("neighbor pollution " + parseInt(neighGame.pollution));
-              // console.log(Games.findOne({$and: [{"gameCode": gameCode}, {"role": "base"}, {"playerName": base.neighbors[n]}]}));
-              // Games.update({$and: [{"gameCode": gameCode}, {"role": "base"}, {"playerName": base.neighbors[n]}]}, {$inc: {"pollution": pollLeak}}, {$push: {"notes": "A neighbor leaked pollution on to you!"}});  
-              Games.update({_id: neighGame._id}, {$set: {"pollution": parseInt(neighGame.pollution) + parseInt(pollLeak)}});
-              // console.log(neighGame.pollution);
-              // Games.update({_id: neighGame._id}, {$push: {"roundNotes": "A neighbor leaked pollution on to you!"}})
-              AddTeamNote.call({"gameCode": neighGame.gameCode, "baseId": neighGame.playerId, "notes": ["A neighbor leaked pollution on to you!"]})
-              roundNotes.push("High pollution, leaked " + pollLeak + " pollution to " + base.neighbors[n]);
-            }
-            
-          }
-          
-        }
         if (newhapp < 0) {
           newhapp = 0;
         }
@@ -377,10 +358,62 @@ export const ConsumeResources = new ValidatedMethod({
 
         Games.update({"_id": base._id}, {$set: {"res": res, "pollution": newpoll, "happiness": newhapp, "population": newpop, "roundNotes": roundNotes}});
       }
+
+      SpreadPollution.call({"gameCode": gameCode}, function (err, res) {
+        if (err) {console.log(err);}
+        else {console.log(res);}
+      })
     }
       // RunBids
       // History.insert({"time": new Date().getTime(), "city": city.name, "cityid": city._id, "res": res, "pollution": newpoll, "happiness": newhapp, "population": newpop});
     // });
+  }
+});
+
+export const SpreadPollution = new ValidatedMethod({
+  name: 'pollution.spread',
+  validate({}) {},
+  run ({gameCode}) {
+    allBases = Games.find({$and: [{"gameCode": gameCode}, {"role": "base"}]}).fetch();
+    for (ab in allBases) {
+      newpoll = parseInt(allBases[ab].pollution);
+      base = allBases[ab];
+      if (newpoll > 6) {
+        pollLeak = (newpoll - 6 ) / 6;
+        pollLeak = parseInt(pollLeak);
+        console.log("leaking pollution " + pollLeak);
+        // roundNotes.push("High pollution, leaking onto neighbors!");
+        // gnumber = admin.groupList.indexOf(base.playerName);
+        // neighbors = 
+        // console.log("pollution leaaaakk");
+        if (pollLeak > 0){
+          for (n in base.neighbors){
+            // console.log("hitting the neighbs " + base.neighbors[n] + " " + pollLeak);
+            neighGame = Games.findOne({$and: [{"gameCode": gameCode}, {"role": "base"}, {"playerName": base.neighbors[n]}]});
+            console.log(neighGame);
+            // console.log("neighbor pollution " + parseInt(neighGame.pollution));
+            // console.log(Games.findOne({$and: [{"gameCode": gameCode}, {"role": "base"}, {"playerName": base.neighbors[n]}]}));
+            // Games.update({$and: [{"gameCode": gameCode}, {"role": "base"}, {"playerName": base.neighbors[n]}]}, {$inc: {"pollution": pollLeak}}, {$push: {"notes": "A neighbor leaked pollution on to you!"}});  
+            neighborPollution = parseInt(neighGame.pollution) + parseInt(pollLeak);
+            // console.log("new neighbor pollution is " + neighborPollution);
+            Games.update({_id: neighGame._id}, {$inc: {"pollution": pollLeak}});
+            // console.log(neighGame.pollution);
+            // Games.update({_id: neighGame._id}, {$push: {"roundNotes": "A neighbor leaked pollution on to you!"}})
+            AddTeamNote.call({"gameCode": neighGame.gameCode, "baseId": neighGame.playerId, "notes": ["A neighbor leaked pollution on to you!"]}, function (err, res) {
+              if (err) {console.log(err);}
+            leakNote = ["High pollution, leaked " + pollLeak + " pollution to " + base.neighbors[n]];
+            AddTeamNote.call({"gameCode": base.gameCode, "baseId": base.playerId, "notes": leakNote}, function (err, res) {
+              if (err) {console.log(err);}
+            });
+            });
+
+            // roundNotes.push("High pollution, leaked " + pollLeak + " pollution to " + base.neighbors[n]);
+          }
+          
+        }
+
+      }
+    }
   }
 });
 
@@ -390,9 +423,10 @@ export const AddTeamNote = new ValidatedMethod({
   run({gameCode, baseId, notes}) {
     if (!this.isSimulation){
       thisbase = Games.findOne({$and: [{"gameCode": gameCode}, {"playerId": baseId}]});
-      console.log(thisbase.roundNotes);
+      // console.log(thisbase.roundNotes);
       Games.update( {"_id": thisbase._id}, {$push: {"roundNotes": {$each: notes}}} );
-      console.log(Games.findOne({ "_id":thisbase._id }).roundNotes);
+      // console.log(Games.findOne({ "_id":thisbase._id }).roundNotes);
+      return true;
     }
   }
 });
@@ -428,7 +462,7 @@ export const NewRound = new ValidatedMethod({
 
       ResetTeamNotes.call({"gameCode": gameCode});
 
-      ConsumeResources.call({}, (err, res) => {
+      ConsumeResources.call({"gameCode": gameCode}, (err, res) => {
         if (err) {console.log(err);}
       });
 

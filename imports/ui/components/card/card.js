@@ -91,7 +91,7 @@ Template.factoryList.helpers({
       "f1": "#FFFF80",
       "f2": "#FFFF80"
     }
-    console.log(this);
+    // console.log(this);
     return producerColors[this.kind];
     // return this;
   },
