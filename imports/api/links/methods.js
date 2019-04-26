@@ -415,7 +415,7 @@ export const ResetTeamNotes = new ValidatedMethod({
 export const NewRound = new ValidatedMethod({
   name: 'newRound',
   validate ({}) {},
-  run({gameCode, producerCount = 3}) {
+  run({gameCode, producerCount = 6}) {
     //reset factory notes, and team notes
     if (!this.isSimulation){
       ResetFactoryNotes.call({"gameCode": gameCode});
@@ -487,6 +487,7 @@ export const TradeResources = new ValidatedMethod({
         tores[resource] = parseInt(tores[resource]) +  parseInt(amount);
         Games.update({"_id": fromGroup._id}, {$set: {"res": fromres}});
         Games.update({"_id": toGroup._id}, {$set: {"res": tores}});
+        return true
       }
       else {
         console.log("under resourced");
@@ -609,6 +610,9 @@ export const JoinGame = new ValidatedMethod({
   validate({}) {},
   run({playerName, playerId, gameCode, role, neighbors = []}) {
     if (!this.isSimulation) {
+      console.log(gameCode);
+      gameCode = gameCode.toLowerCase();
+      gameCode = gameCode.trim();
       gameAdmin = Games.findOne({$and: [{"gameCode": gameCode}, {"role": "admin"}]});
       console.log(gameAdmin);
 

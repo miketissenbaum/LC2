@@ -1,35 +1,42 @@
 <template name="trade">
   <h3> Trade! </h3>
-  <form class="trade">
-    <input type="number" name="amount" placeholder="Amount to send" />
-    <select id="resource">
+  <form class="trade form-horizontal">
+    <div class="form-group">
+      <input class = "form-control" type="number" name="amount" placeholder="Amount to send" />
+    </div>
+    
+    <div class="form-group">
+    <select class = "form-control" id="resource">
       {{#each resource}}
-        <option value = {{name}}>{{name}}</option>
+        <option value = {{name}}>{{displayName}}</option>
       {{/each}}
     </select>
+    </div>
 
-    To: <select id="to-city">
-      {{#each otherPlayers}}
-        <option value = {{_id}}>{{playerName}}</option>
-      {{/each}}
-    </select>
+    <div class="form-group">
+      To: <select class = "form-control" id="to-city">
+        {{#each otherPlayers}}
+          <option value = {{_id}}>{{playerName}}</option>
+        {{/each}}
+      </select>
+    </div>
 
 <!--     From: <select id="from-city">
       {{#each city}}
         <option value = {{name}}>{{name}}</option>
       {{/each}}
     </select> -->
-    <input type="submit" value="trade"/>
+    <input class="form-control" type="submit" value="trade"/>
   </form>
   <br />
 
   <!-- <section id="metalResourceBox"> -->
-    <div id="m1Items">  <img class="cityIcon" src="../img/icons/gold_sml.png">  = M1</div>  
-    <div id="m2Items"><img class="cityIcon" src="../img/icons/steel_sml.png">   = M2</div>
+    <div id="m1Items">  <img class="cityIcon" src="../img/icons/gold_sml.png">  = Gold</div>  
+    <div id="m2Items"><img class="cityIcon" src="../img/icons/steel_sml.png">   = Steel</div>
  <!--  </section>
   <section id=foodResourceBox> -->
-    <div id="f1Items"> <img class="cityIcon" src="../img/icons/food_sml.png">  = F1 </div>   
-    <div id="f2Items"> <img class="cityIcon" src="../img/icons/cotton_sml.png">  = F2 </div>
+    <div id="f1Items"> <img class="cityIcon" src="../img/icons/food_sml.png">  = Food</div>   
+    <div id="f2Items"> <img class="cityIcon" src="../img/icons/cotton_sml.png">  = Cotton </div>
   <!-- </section> -->
 
 </template>

@@ -15,6 +15,8 @@ export const Games = new Mongo.Collection('games');
 
 export const Bids = new Mongo.Collection('bids');
 
+export const Acts = new Mongo.Collection('acts');
+
 
 // db.cities.insert({"name": "city1", "res": {"m1": 2, "m2": 2, "f1": 2, "f2": 2}, "poll": 0, "pop": 5})
 // db.cities.insert({"name": "city2", "res": {"m1": 2, "m2": 2, "f1": 2, "f2": 2}, "poll": 0, "pop": 5})
