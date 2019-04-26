@@ -321,23 +321,23 @@ export const ConsumeResources = new ValidatedMethod({
 
         if ((res.f1 + res.f2) / newpoll > 2) {
           newpop = newpop + 1;
-          roundNotes.push("Satisfactory food, gained population!");
+          roundNotes.push("Your people are well fed, your city is growing!");
         }
 
         else if ((res.f1 + res.f2) / newpoll < 0.8) {
           newpop = newpop - 1;
-          roundNotes.push("Lack of food, lost population!");
+          roundNotes.push("Your people are starving, your city is shrinkng!");
         }
 
         if ((freshFactCount["p1"] + freshFactCount["p2"]*1.0) / newpop  <= 0.2) {
           newhapp -= 1;
           // console.log("parks to population increase");
-          roundNotes.push("Lack of parks, losing happiness");
+          roundNotes.push("Your lack of parks is making people sad");
         }
 
         if (newhapp < 0) {
           newpop = newpop - 1;
-          roundNotes.push("Everybody's too sad, people leaving!");
+          roundNotes.push("Your city is too depressing, people don't want to live there!");
         }
 
         if (newpoll > 6) {
