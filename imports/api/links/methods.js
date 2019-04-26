@@ -356,20 +356,25 @@ export const ConsumeResources = new ValidatedMethod({
           }
         }
 
-        if ((res.f1 + res.f2) / newpoll > 2) {
+        if (((res.f1 + res.f2) / newpoll) > 2) {
           newpop = newpop + 1;
           roundNotes.push("Your people are well fed, your city is growing!");
         }
 
-        else if ((res.f1 + res.f2) / newpoll < 0.5) {
+        else if (((res.f1 + res.f2) / newpoll) < 0.5) {
           newpop = newpop - 1;
           roundNotes.push("Your people are starving, your city is shrinking!");
         }
 
-        if ((freshFactCount["p1"] + freshFactCount["p2"]*1.0) / newpop  <= 0.2) {
+        if (((freshFactCount["p1"] + freshFactCount["p2"]*1.0) / newpop)  <= 0.2) {
           newhapp -= 1;
           // console.log("parks to population increase");
           roundNotes.push("Your lack of parks is making people sad");
+        }
+        else if (((freshFactCount["p1"] + freshFactCount["p2"]*1.0)) / newpop  >= 0.6) {
+          newhapp += 1;
+          // console.log("parks to population increase");
+          roundNotes.push("Your parks bring joy!");
         }
 
         if (newhapp < 0) {
