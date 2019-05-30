@@ -35,10 +35,13 @@
     </section>
     <section id="factoryBox">
       <h3>Your City's Production</h3>
+      <p>
+        f1: {{roundProduction.f1}}, f2: {{roundProduction.f2}}, m1: {{roundProduction.m1}}, m2: {{roundProduction.m2}}, pollution: {{roundProduction.pollution}}
+      </p>
       <table cellpadding="10" class="productionBox">
         <tr>
           {{#each cityFactories}}
-            <td bgcolor="{{producerColor}}" class="cityFactoryInfo">
+            <td style="{{producerColor}}" class="cityFactoryInfo">
               {{> cityFactory}}
             </td>
           {{/each}}
