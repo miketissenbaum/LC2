@@ -6,6 +6,8 @@ import { Meteor } from 'meteor/meteor';
 import { FlowRouter } from 'meteor/kadira:flow-router';
 import '/imports/ui/stylesheets/style.css';
 
+import { ToggleFactory } from '/imports/api/links/methods.js';
+
 // import { NewRound } from '/imports/api/links/methods.js';
 
 Template.cities.onCreated(function helloOnCreated() {
@@ -67,25 +69,49 @@ Template.city.helpers({
   },
 
   producerColor() {
+    // producerColors = {
+    //   "p1": "#BBFF99",
+    //   "p2": "#BBFF99",
+    //   "m1": "#C6C6DB",
+    //   "m2": "#C6C6DB",
+    //   "f1": "#FFFF80",
+    //   "f2": "#FFFF80"
+    // }
     producerColors = {
-      "p1": "#BBFF99",
-      "p2": "#BBFF99",
-      "m1": "#C6C6DB",
-      "m2": "#C6C6DB",
-      "f1": "#FFFF80",
-      "f2": "#FFFF80"
+      "p1": "(187, 255, 153, ",
+      "p2": "(187, 255, 153, ",
+      "m1": "(198, 198, 219, ",
+      "m2": "(198, 198, 219, ",
+      "f1": "(255, 255, 128, ",
+      "f2": "(255, 255, 128, "
+    }
+    alpha = 0.3;
+    if (this.running == true) {
+      alpha = 1;
     }
     // console.log(this);
-    return producerColors[this.kind];
+    return "background-color:rgba" + producerColors[this.kind] + alpha + ")";
     // return this;
+  },
+
+  roundProduction() {
+    prodOutput = {"m1": 0, "m2": 0, "f1": 0, "f2": 0, "pollution": 0};
+    runningProds = Producers.find({$and: [{"gameCode": FlowRouter.getParam("gameCode")}, {"running": true}, {"owned": true}, {"ownerId": Meteor.userId()}]});
+    runningProds.forEach(function (prod) {
+      for (r in prod.prodValues) {
+        prodOutput[r] += prod.prodValues[r];
+      }
+    });
+    return prodOutput;
   }
+
 });
 
 Template.cityFactory.onCreated(function helloOnCreated() {
   // counter starts at 0
   // this.counter = new ReactiveVar(0);
   // Meteor.subscribe('cities.all');
-  Meteor.subscribe('producers.public');
+  // Meteor.subscribe('producers.public');
   Meteor.subscribe('producers.owned');
   Meteor.subscribe('games.running');
   
@@ -102,13 +128,7 @@ Template.cityFactory.helpers({
        retres.push({"resName": r, "resVal": this.prodValues[r], "resValArr": new Array(this.prodValues[r]).fill(0)});
      }
    }
-   // prodText += " Pollution: " + this.prodValues["poll"];
-   // console.log(prodText);
-   // console.log(retres);
-
    return retres;
-
-   // return Producers.find({$and: [{"owned": true}, {"owner": this.name}]});
  },
 
   productionValues() {
@@ -186,8 +206,38 @@ Template.cityFactory.helpers({
     return factoryIconSource[this.kind];
   },
 
+  runningStatus() {
+    if (this.running == true) {
+      return "Enabled";
+    }
+    else {
+      return "Disabled";
+    }
+  }
+
   // FactoryNotes() {
 
   // }
+});
+
+Template.cityFactory.events({
+  'click .toggleRunning' (event,instance) {
+    event.preventDefault();
+    // console.log(instance);
+    // console.log(this.running);
+    runners = Producers.find({$and: [{"running": true}, {"gameCode": FlowRouter.getParam("gameCode")}, {"owned": true}, {"ownerId": Meteor.userId()}]}).fetch();
+    thisGame = Games.findOne({$and: [{"playerId": Meteor.userId()}, {"gameCode": FlowRouter.getParam("gameCode")}, {"status": "running"}, {"role": "base"}]});
+
+    if (runners.length >= thisGame.population && this.running == false) {
+      console.log("not enough people!!!");
+    }
+    else {
+      ToggleFactory.call({"producerId": this._id, "currentStatus": this.running}, function (err, res) {
+        if (err) {
+          console.log(err);
+        }
+      });
+    }
+  }
 });
 

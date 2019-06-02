@@ -30,7 +30,7 @@ Template.trade.helpers({
 });
 
 Template.trade.events({
-  'submit .trade'(event, instance) {
+  'submit .trade' (event, instance) {
     gCode = FlowRouter.getParam("gameCode");
     event.preventDefault();
     val = event.target.amount.value;
@@ -46,9 +46,10 @@ Template.trade.events({
     else {
       TradeResources.call({"amount": parseInt(val), "resource": res, "from": from, "to": to}, (err, res) => {
         if (err) {
-          alert(err);
+          alert(err.error);
+          console.log(err);
         } else {
-          alert("sent!");
+          alert("Sent!");
         }
       });
     }

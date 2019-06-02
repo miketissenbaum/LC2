@@ -1,33 +1,14 @@
 <template name="cities">
   <table cellpadding="10" class="cityTable">
     <tr >
-      <!-- {{#if notCityView}}
-      	{{#each allCities}}
-          <td width = 50%>
-            {{> city}}
-          </td>
-        {{/each}}
-      {{else}} -->
-        {{#each citySet}}
-          <td class="cityRow">
-            {{> city}}
-          </td>
-        {{/each}}
-      <!-- {{/if}} -->
+      {{#each citySet}}
+        <td class="cityRow">
+          {{> city}}
+        </td>
+      {{/each}}
     </tr>
   </table>
-  
-  <!-- <p>You've pressed the button {{counter}} times.</p> -->
 </template>
-
-<!--<template name="individualCity">
-  {{#each individualCities}}
-    {{> city}}
-  {{/each}}
-   -->
-  <!-- <p>You've pressed the button {{counter}} times.</p> -->
-<!-- </template> -->
-
 
 <template name="city">
   <!-- {{}} -->
@@ -54,10 +35,13 @@
     </section>
     <section id="factoryBox">
       <h3>Your City's Production</h3>
+      <p>
+        f1: {{roundProduction.f1}}, f2: {{roundProduction.f2}}, m1: {{roundProduction.m1}}, m2: {{roundProduction.m2}}, pollution: {{roundProduction.pollution}}
+      </p>
       <table cellpadding="10" class="productionBox">
         <tr>
           {{#each cityFactories}}
-            <td bgcolor="{{producerColor}}" class="cityFactoryInfo">
+            <td style="{{producerColor}}" class="cityFactoryInfo">
               {{> cityFactory}}
             </td>
           {{/each}}
@@ -79,21 +63,16 @@
       {{{CostInfo this.prodValues ""}}} 
     </div>
     <br />
-    <div id="consuptionValue">
+    <div id="consumptionValue">
       <span class="productionLabel">Consumes</span>
       {{{CostInfo this.prodCosts ""}}}
     </div>
   </div>
-<!--   <div id="consuptionValue">
-    <span class="productionLabel">Consumes</span>
-    {{{CostInfo this.prodCosts ""}}}
-  </div> -->
-  {{#each productionRes}}
-    <!-- <p> item </p> -->
-   {{#each resValArr}}
-     <!-- <p>test</p> -->
-   {{/each}}
-  {{/each}}<br />
+  
+  <br />
+  <button type="button" class="btn btn-outline-primary toggleRunning" data-toggle="button" aria-pressed="false" autocomplete="off">
+    {{runningStatus}}
+  </button>
   <div class="cityFacotryNotes">
   Notes: {{#each roundNotes}}  {{this}} <br />   {{/each}}
   </div>

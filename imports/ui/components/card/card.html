@@ -21,47 +21,19 @@
     </div>
   </template>
 
-<!--   <table cellpadding="10">
-    <tr><h3 id="marketHeader"> Marketplace </h3></tr>
-    {{#each bidKinds}}
-      <tr>
-        <td class="marketType"> <img src="{{ResourceIcon this}}" /> </td>
-      	{{#each PublicFactories this}}
-          <td bgcolor="{{factoryColor}}" class="factoryCards">
-            <div class="factoryInfo">
-              <img class="factoryIcon" src="{{factoryIcon}}">
-              {{> factory}}
-            </div>
-          </td>
-        {{/each}}
-      </tr>
-    {{/each}}
-  </table> -->
-  <!-- <button class="newRound">Next Round</button> -->
-  <!-- <p>You've pressed the button {{counter}} times.</p> -->
-  <!-- <button class="toggleCity">{{CurrentCity}} - Toggle selection</button> -->
-
 
 
 <template name="factory">
-<!-- {{}} -->
-    <!-- {{ProductionText}} <br /> -->
-    <!-- You can buy it for 
-    {{buyCost.m1}} of m1, {{buyCost.f1}} of f1, {{buyCost.m2}} of m2, {{buyCost.f2}} of f2,  -->
-    <!-- <br /> -->
     <div id="productionValues">
       <span class="productionLabel">Produces</span>
       {{{CostInfo this.prodValues ""}}} 
     </div>
-    <!-- and produces {{prodValues.poll}} pollution. -->
     <br />
     <div id="consuptionValue">
       <span class="productionLabel">Consumes</span>
     {{{CostInfo this.prodCosts ""}}}
     </div>
 
-    <!-- {{}} -->
-    
     <br />
-    <button class="bid" name="-1"> -1 </button>  {{FactoryBid}} <button class="bid" name="+1"> +1</button>
+    <button type="button" class="btn btn-outline-primary bid" name="-1"> -1 </button>  Bid amt: {{FactoryBid}} <button type="button" class="btn btn-outline-primary bid" name="+1"> +1</button>
 </template>
