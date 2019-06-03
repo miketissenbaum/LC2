@@ -186,25 +186,32 @@ Template.factory.helpers({
 
    thisGame = Games.findOne({$and: [{"gameCode": FlowRouter.getParam("gameCode")}, {"playerId": Meteor.userId()}]});
 
-   valtext = "";
+   valtext = "0";
    affordability = true;
-   if (bid != undefined){
-     valtext = bid.bidVal;
-     if (thisGame.res[this.bidKind] < bid.bidVal) {
-       valtext += " - Can't Afford!";
+   
+  if (bid != undefined){
+    valtext = bid.bidVal;
+    if (thisGame.res[this.bidKind] < bid.bidVal) {
+      valtext += " - Can't Afford!";
        affordability = false;
        // console.log(affordability);
        // console.log(this._id);
        // UpdateBid.call({"bidId": this._id, "affordability": affordability});
 
-     }
-     else {
+    }
+    else {
+
        // console.log(affordability);
        // console.log(this._id);
        // UpdateBid.call({"bidId": this._id, "affordability": affordability});
-     }
+    }
      // console.log(bid.bidVal);
-   }
+  }
+
+  // else if (valtext = ""){
+  //     valtext = 0;
+  //   }
+
    return valtext;
  },
 
