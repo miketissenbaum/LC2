@@ -120,8 +120,8 @@ Template.city.helpers({
     var parksToPop = parks / thisgame.population;
     prodOutput["parksToPop"] = parksToPop;
     prodOutput["foodToPoll"] = foodToPoll;
-    console.log(thisgame);
-    console.log(prodOutput);
+    // console.log(thisgame);
+    // console.log(prodOutput);
     return prodOutput;
   }
 

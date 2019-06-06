@@ -520,7 +520,7 @@ export const ResetTeamNotes = new ValidatedMethod({
 export const NewRound = new ValidatedMethod({
   name: 'newRound',
   validate ({}) {},
-  run({gameCode, producerCount = 6}) {
+  run({gameCode, producerCount = 4}) {
     //reset factory notes, and team notes
     if (!this.isSimulation){
       ResetFactoryNotes.call({"gameCode": gameCode});
