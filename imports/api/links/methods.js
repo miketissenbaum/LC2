@@ -383,11 +383,11 @@ export const ConsumeResources = new ValidatedMethod({
         var parksToPop = (parks * 1.0);
         if (newpop > 0){
           parksToPop = parksToPop / newpop;
-          if (parksToPop  <= 0.25) {
+          if (parksToPop  <= 0.2) {
             newhapp -= 1;          
             roundNotes.push("Your lack of parks is making people sad");
           }
-          else if (parksToPop >= 0.6) {
+          else if (parksToPop >= 0.4) {
             newhapp += 1;
             roundNotes.push("Your parks bring joy!");
           }
