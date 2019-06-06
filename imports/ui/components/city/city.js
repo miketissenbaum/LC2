@@ -118,8 +118,25 @@ Template.city.helpers({
     var totalFood = thisgame.res.f1 + thisgame.res.f2 + prodOutput["f1"] + prodOutput["f2"];
     var foodToPoll = totalFood / (thisgame.pollution + prodOutput["pollution"]);
     var parksToPop = parks / thisgame.population;
-    prodOutput["parksToPop"] = parksToPop;
-    prodOutput["foodToPoll"] = foodToPoll;
+    // prodOutput["parksToPop"] = parksToPop;
+    // prodOutput["foodToPoll"] = foodToPoll;
+    var happChange = 0;
+    var popChange = 0;
+    if (parksToPop <= 0.25) {
+      happChange += -1;
+    }
+    else if (parksToPop >= 0.6) {
+      happChange += 1;
+    }
+
+    if (foodToPoll < 0.7) {
+      popChange += 1;
+    }
+    else {
+      popChange += -1;
+    }
+    prodOutput["population"] = popChange;
+    prodOutput["happiness"] = happChange;
     // console.log(thisgame);
     // console.log(prodOutput);
     return prodOutput;

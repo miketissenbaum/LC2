@@ -33,13 +33,39 @@
 
       <div class="cityMetric"><img class="cityIcon" src="../img/icons/happiness_med.png"> {{happiness}} </div>
     </section>
-    <section id="factoryBox">
-      <h3>Your City's Production</h3>
+    
+      <section class="scoreBoxStyle">
+        <h3>With chosen factories, your production will be:</h3>
+        <div class="cityMetric"> <img class="cityIcon" src="../img/icons/gold_sml.png"> {{roundProduction.m1}} </div>
+        <div class="cityMetric"> <img class="cityIcon" src="../img/icons/steel_sml.png"> {{roundProduction.m2}} </div>
+        <div class="cityMetric"> <img class="cityIcon" src="../img/icons/food_sml.png"> {{roundProduction.f1}} </div>
+        <div class="cityMetric"> <img class="cityIcon" src="../img/icons/cotton_sml.png"> {{roundProduction.f2}} </div>
+
+        <div class="cityMetric"> <img class="cityIcon" src="../img/icons/pollution_med.png"> {{roundProduction.pollution}} </div>
+        <div class="cityMetric"> <img class="cityIcon" src="../img/icons/population_med.png"> {{roundProduction.population}} </div>
+        <div class="cityMetric"><img class="cityIcon" src="../img/icons/happiness_med.png"> {{roundProduction.happiness}} </div>
+
+      </section>
       <p>
-        f1: {{roundProduction.f1}}, f2: {{roundProduction.f2}}, m1: {{roundProduction.m1}}, m2: {{roundProduction.m2}}, pollution: {{roundProduction.pollution}}, 
-        Food to pollution: {{roundProduction.foodToPoll}},
-        Parks to population: {{roundProduction.parksToPop}}
+        <h5>
+          If your food is 2x your pollution, people are well fed, and population increases. If it's less 0.7x, it drops!
+          If you have enough parks (0.6x your population), happiness increases. If parks are too low (0.25x), it drops.
+        </h5>
       </p>
+      <!-- <section class="scoreBoxStyle">
+        <div id="m1Items">  <img class="cityIcon" src="../img/icons/gold_sml.png"> {{roundProduction.m1}}</div>  
+        <div id="m2Items">  <img class="cityIcon" src="../img/icons/steel_sml.png">  {{roundProduction.m2}}</div>
+      </section>
+      <section id=foodResourceBox>
+        <div id="f1Items"> <img class="cityIcon" src="../img/icons/food_sml.png"> {{roundProduction.f1}} </div>   
+        <div id="f2Items"> <img class="cityIcon" src="../img/icons/cotton_sml.png"> {{roundProduction.f2}} </div>
+      </section> -->
+        <!-- f1: {{roundProduction.f1}}, f2: {{roundProduction.f2}}, m1: {{roundProduction.m1}}, m2: {{roundProduction.m2}}, pollution: {{roundProduction.pollution}},  -->
+        <!-- Food to pollution: {{roundProduction.foodToPoll}},
+        Parks to population: {{roundProduction.parksToPop}} -->
+      <!-- </p> -->
+      <section id="factoryBox">
+      <h3>Your City's Production</h3>
       <table cellpadding="10" class="productionBox">
         <tr>
           {{#each cityFactories}}
@@ -76,6 +102,6 @@
     {{runningStatus}}
   </button>
   <div class="cityFacotryNotes">
-  Notes: {{#each roundNotes}}  {{this}} <br />   {{/each}}
+  Notes from last run: {{#each roundNotes}}  {{this}} <br />   {{/each}}
   </div>
 </template>

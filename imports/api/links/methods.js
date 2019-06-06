@@ -368,7 +368,7 @@ export const ConsumeResources = new ValidatedMethod({
           foodToPoll = foodToPoll / newpoll;
         }
 
-        roundNotes.push("food: " + availFood);
+        // roundNotes.push("food: " + availFood);
 
         if (foodToPoll > 2) {
           newpop = newpop + 1;
@@ -383,7 +383,7 @@ export const ConsumeResources = new ValidatedMethod({
         var parksToPop = (parks * 1.0);
         if (newpop > 0){
           parksToPop = parksToPop / newpop;
-          if (parksToPop  <= 0.2) {
+          if (parksToPop  <= 0.25) {
             newhapp -= 1;          
             roundNotes.push("Your lack of parks is making people sad");
           }
@@ -397,7 +397,7 @@ export const ConsumeResources = new ValidatedMethod({
           roundNotes.push("No people! Defaulting to 1 happiness");
         }
 
-        roundNotes.push("parks to population ratio:  " + parksToPop);
+        // roundNotes.push("parks to population ratio:  " + parksToPop);
 
         if (newhapp < 0) {
           newpop = newpop - 1;
