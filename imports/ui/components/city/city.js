@@ -63,7 +63,7 @@ Template.city.helpers({
     // console.log(Producers.find({}).fetch());
     // console.log(Producers.find({$and: [{"gameCode": FlowRouter.getParam("gameCode")}, {"owned": true}, {"ownerId": Meteor.userId()}]}).fetch());
     // console.log(FlowRouter.getParam("gameCode") + " " + Meteor.userId());
-    console.log(Producers.find({$and: [{"gameCode": FlowRouter.getParam("gameCode")}, {"ownerId": Meteor.userId()}]}).fetch());
+    // console.log(Producers.find({$and: [{"gameCode": FlowRouter.getParam("gameCode")}, {"ownerId": Meteor.userId()}]}).fetch());
     
     return Producers.find({$and: [{"gameCode": FlowRouter.getParam("gameCode")}, {"owned": true}, {"ownerId": Meteor.userId()}]});
   },
@@ -105,11 +105,23 @@ Template.city.helpers({
   roundProduction() {
     prodOutput = {"m1": 0, "m2": 0, "f1": 0, "f2": 0, "pollution": 0};
     runningProds = Producers.find({$and: [{"gameCode": FlowRouter.getParam("gameCode")}, {"running": true}, {"owned": true}, {"ownerId": Meteor.userId()}]});
+    var parks = 0;
     runningProds.forEach(function (prod) {
+      if (prod.kind == "p1" || prod.kind == "p2") {
+        parks += 1;
+      }
       for (r in prod.prodValues) {
         prodOutput[r] += prod.prodValues[r];
       }
     });
+    var thisgame = Games.findOne({$and: [{"playerId": Meteor.userId()}, {"gameCode": FlowRouter.getParam("gameCode")}, {"status": "running"}, {"role": "base"}]})
+    var totalFood = thisgame.res.f1 + thisgame.res.f2 + prodOutput["f1"] + prodOutput["f2"];
+    var foodToPoll = totalFood / (thisgame.pollution + prodOutput["pollution"]);
+    var parksToPop = parks / thisgame.population;
+    prodOutput["parksToPop"] = parksToPop;
+    prodOutput["foodToPoll"] = foodToPoll;
+    console.log(thisgame);
+    console.log(prodOutput);
     return prodOutput;
   }
 
@@ -238,6 +250,7 @@ Template.cityFactory.events({
 
     if (runners.length >= thisGame.population && this.running == false) {
       console.log("not enough people!!!");
+      //alert("Everybody's already employed!");
     }
     else {
       ToggleFactory.call({"producerId": this._id, "currentStatus": this.running}, function (err, res) {

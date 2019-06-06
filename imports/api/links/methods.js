@@ -203,7 +203,7 @@ export const RunBids = new ValidatedMethod({
                 purchased = "bid success";
                 console.log("bid success cause top bid led");
                 BuyProducer.call({"producer": prod._id, "player": affBids[i].baseId, "gameCode": gameCode, "bid": affBids[i]}, function (err, res){
-                  if (err) {console.log(res);}
+                  if (err) {console.log(err);}
                 });
                 AddTeamNote.call({"gameCode": gameCode, "baseId": affBids[i].baseId, "notes": ["Your bid succeeded!"]})
                 purchased = true;
@@ -213,7 +213,7 @@ export const RunBids = new ValidatedMethod({
               console.log("bid success cause only 1 bid");
               purchased = "bid success";
               BuyProducer.call({"producer": prod._id, "player": affBids[i].baseId, "gameCode": gameCode, "bid": affBids[i]}, function (err, res){
-                if (err) {console.log(res);}
+                if (err) {console.log(err);}
               });
               purchased = true;
             }
@@ -379,10 +379,11 @@ export const ConsumeResources = new ValidatedMethod({
           newpop = newpop - 1;
           roundNotes.push("Your people are starving, your city is shrinking!");
         }
+
         var parksToPop = (parks * 1.0);
         if (newpop > 0){
           parksToPop = parksToPop / newpop;
-          if (parksToPop  <= 0.25) {
+          if (parksToPop  <= 0.2) {
             newhapp -= 1;          
             roundNotes.push("Your lack of parks is making people sad");
           }
@@ -424,10 +425,11 @@ export const ConsumeResources = new ValidatedMethod({
         
       }
 
-      SpreadPollution.call({"gameCode": gameCode}, function (err, res) {
-        if (err) {console.log(err);}
-        else {console.log(res);}
-      })
+      SpreadPollution.call({"gameCode": gameCode});
+      // SpreadPollution.call({"gameCode": gameCode}, function (err, res) {
+      //   if (err) {console.log(err);}
+      //   else {console.log(res);}
+      // });
     }
       // RunBids
       // History.insert({"time": new Date().getTime(), "city": city.name, "cityid": city._id, "res": res, "pollution": newpoll, "happiness": newhapp, "population": newpop});
@@ -444,7 +446,7 @@ export const SpreadPollution = new ValidatedMethod({
       newpoll = parseInt(allBases[ab].pollution);
       base = allBases[ab];
       if (newpoll > 6) {
-        pollLeak = (newpoll - 6 ) / 6;
+        pollLeak = (newpoll - 3 ) / 3;
         pollLeak = parseInt(pollLeak);
         console.log("leaking pollution " + pollLeak);
         // roundNotes.push("High pollution, leaking onto neighbors!");
@@ -455,7 +457,7 @@ export const SpreadPollution = new ValidatedMethod({
           for (n in base.neighbors){
             console.log("hitting the neighbs " + base.neighbors[n] + " " + pollLeak);
             neighGame = Games.findOne({$and: [{"gameCode": gameCode}, {"role": "base"}, {"playerName": base.neighbors[n]}]});
-            console.log(neighGame);
+            // console.log(neighGame);
             // console.log("neighbor pollution " + parseInt(neighGame.pollution));
             // console.log(Games.findOne({$and: [{"gameCode": gameCode}, {"role": "base"}, {"playerName": base.neighbors[n]}]}));
             // Games.update({$and: [{"gameCode": gameCode}, {"role": "base"}, {"playerName": base.neighbors[n]}]}, {$inc: {"pollution": pollLeak}}, {$push: {"notes": "A neighbor leaked pollution on to you!"}});  
@@ -833,6 +835,29 @@ export const MakeBid = new ValidatedMethod({
       //     }
       //   });
       // }
+    }
+  }
+});
+
+
+export const ChangeStat = new ValidatedMethod({
+  name: 'stat.admin',
+  validate({}) {},
+  run({gameCode, group, resource, amount}) {
+    if (!this.isSimulation) {
+      // console.log(gameCode + " " + group + " " + resource + " " + amount);
+      // console.log(Games.findOne({$and: [{"gameCode": gameCode}, {"group": group}, {"role": "base"}]}));
+      setObj = {};
+      setObj[resource] = amount;
+      // console.log(setObj);
+      Games.update({$and: [{"gameCode": gameCode}, {"group": group}, {"role": "base"}]}, {$set: setObj} , {multi: false}, (err, res) => {
+        if (err) {
+          // console.log(err);
+        }
+        else {
+          // console.log(res);
+        }
+      });
     }
   }
 });

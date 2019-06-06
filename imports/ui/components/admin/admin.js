@@ -3,6 +3,7 @@ import '../gameList/gameList.js';
 import { Producers } from '/imports/api/links/links.js';
 // import { Assets } from '/imports/api/links/links.js';
 import { Meteor } from 'meteor/meteor';
+import { ChangeStat } from '/imports/api/links/methods.js';
 import { NewRound } from '/imports/api/links/methods.js';
 import { StartGame } from '/imports/api/links/methods.js';
 import { Games } from '/imports/api/links/links.js';
@@ -39,10 +40,23 @@ Template.adminGame.helpers({
     disgame = Games.findOne({"gameCode": FlowRouter.getParam("gameCode")})
     // console.log( disgame.groupList);
     return disgame.groupList;
+  },
+
+  gameResource() {
+    return ["res.m1", "res.m2", "res.f1", "res.f2", "pollution", "population", "happiness"];
   }
 });
 
 Template.adminGame.events({
+  'submit .changeStat' (event, instance) {
+    event.preventDefault();
+    console.log(event.target.amount.value);
+    console.log(event.target.resource.name);
+    console.log(event.target.resource.value);
+
+    ChangeStat.call({"gameCode": FlowRouter.getParam("gameCode"), "group": event.target.resource.name, "resource": event.target.resource.value, "amount": event.target.amount.value});
+  },
+
   'click .reset' (event, instance) {
     ResetAll.call({"gameCode": FlowRouter.getParam("gameCode")}, (err, res) => {
       if (err) {console.log(err);}

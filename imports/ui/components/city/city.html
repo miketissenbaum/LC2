@@ -36,7 +36,9 @@
     <section id="factoryBox">
       <h3>Your City's Production</h3>
       <p>
-        f1: {{roundProduction.f1}}, f2: {{roundProduction.f2}}, m1: {{roundProduction.m1}}, m2: {{roundProduction.m2}}, pollution: {{roundProduction.pollution}}
+        f1: {{roundProduction.f1}}, f2: {{roundProduction.f2}}, m1: {{roundProduction.m1}}, m2: {{roundProduction.m2}}, pollution: {{roundProduction.pollution}}, 
+        Food to pollution: {{roundProduction.foodToPoll}},
+        Parks to population: {{roundProduction.parksToPop}}
       </p>
       <table cellpadding="10" class="productionBox">
         <tr>
@@ -46,7 +48,7 @@
             </td>
           {{/each}}
         </tr>
-        <tr>Notes: {{#each roundNotes}}  {{this}} <br />   {{/each}}</tr>
+        <tr>Notes from last run: {{#each roundNotes}}  {{this}} <br />   {{/each}}</tr>
       </table>
     </section>
   </div>
