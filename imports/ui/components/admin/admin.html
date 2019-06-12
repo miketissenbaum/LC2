@@ -9,8 +9,23 @@
   </form>
 
   {{> gameList }}
-</template>
 
+  <div class="panel panel-default">
+    <div class="panel-heading">Paused Games</div>
+    <ul class="list-group">
+
+      {{#each pausedGames}}
+        <a href="/games/{{gameCode}}">
+          <li class="list-group-item">
+            {{gameCode}}  {{gameSize}}
+          </li>
+        </a>
+      {{/each}}
+    </ul>
+  </div>
+
+  
+</template>
 
 <template name="adminGame">
   <table>
@@ -37,11 +52,21 @@
     </tr>
     {{/each}}
   </table>
-  <button class="newRound btn btn-default">Next Round</button>
+  <p>
+    <button class="newRound btn btn-default">Next Round</button>
+  </p>
   <br />
-  <button class="reset btn btn-default"> Reset everything </button>
+  <p>
+    <button class="reset btn btn-default"> Reset everything </button>
+  </p>
   <br />
-  <button class="btn btn-default seeScore">See scoreboard</button>
+  <p>
+    <button class="btn btn-default seeScore">See scoreboard</button>
+  </p>
+
+  Status: {{status}}
+  <button class="btn btn-default toggleGameState">Toggle</button>
+
 </template>
 
 <!-- <template name="adminGames">

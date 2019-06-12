@@ -7,17 +7,12 @@ import { Meteor } from 'meteor/meteor';
 import { Games } from '/imports/api/links/links.js';
 
 Template.gameList.onCreated(function helloOnCreated() {
-  // counter starts at 0
-  // this.counter = new ReactiveVar(0);
-  Meteor.subscribe('games.running');
+  Meteor.subscribe('games.minerunning');
 });
 
 Template.gameList.helpers({
   userGames() {
-    // console.log(Meteor.userId());
-    // console.log(Games.find({"playerId": Meteor.userId()}).fetch());
-    // console.log(Games.find().fetch());
-    return Games.find({"playerId": Meteor.userId()});
+    return Games.find({$and: [{"playerId": Meteor.userId()}, {"status": "running"}]});
   },
 
   gameSize() {

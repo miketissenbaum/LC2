@@ -123,27 +123,6 @@ export const UpdateBid = new ValidatedMethod({
   }
 });
 
-// export const UpdateBid = new ValidatedMethod({
-//   name: 'bids.afford',
-//   validate ({}) {},
-//   run ({bidList}) {
-//     if (!this.isSimulation){
-//       // console.log(bidId + " " + affordability);
-//       if (affordability!= undefined){
-//         Bids.update(
-//           {"_id": bidId}, 
-//           {$set: {
-//             "affordability": affordability
-//             }
-//           });
-//       }
-//       return true;
-//     }
-//   }
-// });
-
-
-
 export const ClearBids = new ValidatedMethod({
   name: 'bids.clear',
   validate ({}) {},
@@ -699,6 +678,16 @@ export const StartGame = new ValidatedMethod({
   }
 });
 
+export const ToggleGameRunning = new ValidatedMethod({
+  name: 'game.toggle',
+  validate({}) {},
+  run({gameCode, currentState}) {
+    var newState = "running";
+    if (currentState == "running") {newState = "paused";}
+    Games.update({"gameCode": gameCode}, {$set: {"status": newState}}, {multi: true});
+  }
+});
+
 shuffle = function(v){
   for(var j, x, i = v.length; i; j = parseInt(Math.random() * i), x = v[--i], v[i] = v[j], v[j] = x);
   return v;
@@ -810,31 +799,6 @@ export const MakeBid = new ValidatedMethod({
       MakeLog.call({"key": "BidAct", "log": logObj}, function (err, res) {
         if (err) {console.log(err);}
       });
-      
-      // Bids.update( {"gameCode": FlowRouter.getParam("gameCode")})
-
-      // Games.insert({
-      //   "gameCode": newgc, 
-      //   "playerName": adminUsername, 
-      //   "playerId": adminId,
-      //   "role": "admin",
-      //   "status": "running",
-      //   "group": "none",
-      //   "groupList":  baseList.slice(0,cityCount)
-      // });
-      // for (var i = 0; i < cityCount; i++) {
-      //   // console.log(baseList[i]);
-      //   console.log(Meteor.users.find({}).fetch());
-      //   JoinGame.call({"playerName": baseList[i], "playerId": Meteor.users.findOne({"profile.name": baseList[i]})._id, "gameCode": newgc, "role": "base"}, (err, res) => {
-      //     if (err) {
-      //       console.log(err);
-      //       return err;
-      //     }
-      //     else {
-      //       return res;
-      //     }
-      //   });
-      // }
     }
   }
 });

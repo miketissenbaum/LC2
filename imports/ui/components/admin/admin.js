@@ -6,14 +6,14 @@ import { Meteor } from 'meteor/meteor';
 import { ChangeStat } from '/imports/api/links/methods.js';
 import { NewRound } from '/imports/api/links/methods.js';
 import { StartGame } from '/imports/api/links/methods.js';
+import { ToggleGameRunning } from '/imports/api/links/methods.js';
 import { Games } from '/imports/api/links/links.js';
 
 Template.adminView.onCreated(function helloOnCreated() {
-
+  Meteor.subscribe('games.minepaused');
 });
 
 Template.adminView.helpers({
-
 });
 
 Template.adminView.events({
@@ -31,19 +31,36 @@ Template.adminView.events({
   }
 });
 
+Template.makeGame.onCreated(function helloOnCreated() {
+  Meteor.subscribe('games.minepaused');
+});
+
+Template.makeGame.helpers({
+  pausedGames() {
+    // console.log("trying paused");
+    // console.log(Games.find({$and: [{"playerId": Meteor.userId()}, {"status": "paused"}]}));
+    return Games.find({$and: [{"playerId": Meteor.userId()}, {"status": "paused"}]});
+  }
+});
+
+
 Template.adminGame.onCreated(function helloOnCreated() {
-  Meteor.subscribe('games.running');
+  Meteor.subscribe('games.minerunning');
 });
 
 Template.adminGame.helpers({
   allPlayers() {
-    disgame = Games.findOne({"gameCode": FlowRouter.getParam("gameCode")})
+    disgame = Games.findOne({"gameCode": FlowRouter.getParam("gameCode")});
     // console.log( disgame.groupList);
     return disgame.groupList;
   },
 
   gameResource() {
     return ["res.m1", "res.m2", "res.f1", "res.f2", "pollution", "population", "happiness"];
+  },
+
+  status() {
+    return Games.findOne({"gameCode": FlowRouter.getParam("gameCode")}).status;
   }
 });
 
@@ -73,5 +90,12 @@ Template.adminGame.events({
 
   'click .seeScore' (event, instance) {
     FlowRouter.go('App.scoreboard', {gameCode: FlowRouter.getParam("gameCode")});
+  },
+
+  'click .toggleGameState' (event, instance) {
+    // var status = instance;
+    var status = Games.findOne({"gameCode": FlowRouter.getParam("gameCode")}).status;
+    // console.log(status);
+    ToggleGameRunning.call({"gameCode": FlowRouter.getParam("gameCode"), "currentState": status});
   }
 });
