@@ -42,9 +42,29 @@ Meteor.publish('assets.all', function () {
   return Assets.find();
 });
 
-Meteor.publish('games.running', function () {
+Meteor.publish('games.minerunning', function () {
   // console.log(this.users());
   return Games.find({$and: [{"playerId": Meteor.userId()}, {"status": "running"}]});
+});
+
+Meteor.publish('games.minepaused', function () {
+  // console.log(this.users());
+  return Games.find({$and: [{"playerId": Meteor.userId()}, {"status": "paused"}]});
+});
+
+Meteor.publish('games.mine', function () {
+  // console.log(this.users());
+  return Games.find({$and: [{"playerId": Meteor.userId()}]});
+});
+
+Meteor.publish('games.paused', function () {
+  // console.log(this.users());
+  return Games.find({$and: [{"status": "paused"}]});
+});
+
+Meteor.publish('games.running', function () {
+  // console.log(this.users());
+  return Games.find({$and: [{"status": "running"}]});
 });
 
 Meteor.publish('games.all', function () {

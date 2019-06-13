@@ -57,6 +57,13 @@
 	overflow: hidden;
 }
 
+.scoreBoxStyle {
+  margin-top: 15px;
+  font-weight: bold;
+  font-size: 35px;
+  overflow: hidden;
+}
+
 #factoryBox {
 	margin-top: 15px;
 }
@@ -175,7 +182,7 @@ body {
 }
 
 .cityFactoryInfo {
-	width: 33%;
+	width: 32%;
 	padding: 5px;
 }
 
