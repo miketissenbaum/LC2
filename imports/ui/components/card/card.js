@@ -126,7 +126,7 @@ Template.factoryList.events({
 
 Template.factoryList.onCreated(function helloOnCreated() {
   Meteor.subscribe('bids.local');
-  Meteor.subscribe('games.running');
+  Meteor.subscribe('games.minerunning');
 });
 
 Template.factory.helpers({
@@ -287,13 +287,13 @@ Template.factory.events({
     // console.log(event.target.text);
     console.log(event.target.name);
     val = parseInt(event.target.name);
-    thisGroup = Games.findOne({"gameCode": FlowRouter.getParam("gameCode")});
+    thisGroup = Games.findOne({$and: [{"gameCode": FlowRouter.getParam("gameCode")}, {"playerId": Meteor.userId()}]});
 
-    if (thisGroup.role != "base") {
-      FlowRouter.go('home');
-    }
-    else{
+    // if (thisGroup.role != "base") {
+      // FlowRouter.go('home');
+    // }
+    // else{
       MakeBid.call({"baseId": Meteor.userId(), "producer": this._id, "group": thisGroup.group, "gameCode": FlowRouter.getParam("gameCode"), "change": val, "bidKind": this.bidKind});
-    }
+    // }
   }
 });
