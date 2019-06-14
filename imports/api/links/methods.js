@@ -682,9 +682,58 @@ export const ToggleGameRunning = new ValidatedMethod({
   name: 'game.toggle',
   validate({}) {},
   run({gameCode, currentState}) {
-    var newState = "running";
-    if (currentState == "running") {newState = "paused";}
-    Games.update({"gameCode": gameCode}, {$set: {"status": newState}}, {multi: true});
+    if (!this.isSimulation) {
+      var newState = "running";
+      if (currentState == "running") {newState = "paused";}
+      Games.update({"gameCode": gameCode}, {$set: {"status": newState}}, {multi: true});
+    }
+  }
+});
+
+export const ChangeTeam = new ValidatedMethod({
+  name: 'team.change',
+  validate({}) {},
+  run({gameCode, player, group}) {
+    if (!this.isSimulation) {
+      Games.update({$and: [{"gameCode": gameCode}, {"playerName": player}]}, {$set: {"group": group}});
+    }
+  }
+});
+
+export const MakeBase = new ValidatedMethod({
+  name: 'team.new',
+  validate({}) {},
+  run({gameCode, playerName}) {
+    if (!this.isSimulation) {
+      player = Meteor.users.findOne({"profile.name": playerName});
+      if (player != undefined){
+        playerId = player._id;
+        JoinGame.call({"playerName": playerName, "playerId": playerId, "gameCode": gameCode, "role": "base", "neighbors": []});
+        bases = [];
+        Games.find({$and: [{"gameCode": gameCode}, {"role": "base"}]}).forEach(function (base) {
+          bases.push(base.playerName);
+        });
+      }
+      Games.update({$and: [{"gameCode": gameCode}, {"role": "admin"}]}, {$set: {groupList: bases}});
+    }
+  }
+});
+
+export const AddNeighbor = new ValidatedMethod({
+  name: 'team.neighbor',
+  validate({}) {},
+  run({gameCode, cityName, neighbor}) {
+    if (!this.isSimulation) {
+      if (neighbor != "empty") {
+        if (Games.findOne({$and: [{"gameCode": gameCode}, {"role": "base"}, {"playerName": neighbor}]}) != undefined){
+          Games.update({$and: [{"gameCode": gameCode}, {"role": "base"}, {"playerName": cityName}]}, {$addToSet: {"neighbors": neighbor}});
+        }
+      }
+      else {
+
+        Games.update({$and: [{"gameCode": gameCode}, {"role": "base"}, {"playerName": cityName}]}, {$set: {"neighbors": []}}); 
+      }
+    }
   }
 });
 
@@ -720,6 +769,13 @@ export const JoinGame = new ValidatedMethod({
       if (gameAdmin != undefined) {
 
         var group = playerName;
+        var deets = {
+          "gameCode": gameCode,
+          "playerName": playerName,
+          "playerId": playerId,
+          "role": role,
+          "status": "running",  
+        };
         if (role == "player"){
           //see which city has fewer players, and add to one of those cities.
           //re assign group in here.
@@ -732,26 +788,25 @@ export const JoinGame = new ValidatedMethod({
           });
           grp = sortedGroups[0].groupIndex;
           console.log("group is " + grp);
-          group = grp;  
+          group = grp;
+
         }
+        else if (role == "base") {
+          deets["res"] = {"m1": 2, "m2": 2, "f1": 2, "f2": 2};
+          deets["pollution"] = 0;
+          deets["population"] = 0;
+          deets["happiness"] = 0;
+          deets["neighbors"] = neighbors;
+        }
+
+        deets["group"] = group;
+
 
         Games.update({
           "gameCode": gameCode, 
-          "playerId": playerId
-        },{$set:{
-          "gameCode": gameCode, 
-          "playerName": playerName, 
           "playerId": playerId,
-          "role": role,
-          "status": "running",
-          "group": group,
-          // "factoryCount": factCount, 
-          "res": {"m1": 2, "m2": 2, "f1": 2, "f2": 2}, 
-          "pollution": 0, 
-          "population": 5, 
-          "happiness": 5,
-          "neighbors": neighbors
-        }}, {upsert: true});
+          "playerName": playerName
+        },{$set: deets}, {upsert: true});
 
       }
       else {
@@ -822,6 +877,16 @@ export const ChangeStat = new ValidatedMethod({
           // console.log(res);
         }
       });
+    }
+  }
+});
+
+export const userExists = new ValidatedMethod({
+  name: 'user.exists',
+  validate({}) {},
+  run ({username}) {
+    if (!this.isSimulation){
+      return !!Meteor.users.findOne({"username": username});
     }
   }
 });

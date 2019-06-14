@@ -1,8 +1,9 @@
 TODOS
- - only display running games
- - in admin view, show dropdown of all players, dropdown of all teams, dropdown of roles
-    - enable changing teams
-    - enable changing roles (make a base, or remove a base)
+ // - only display running games
+ 
+ //- in admin view, show dropdown of all players, dropdown of all teams, dropdown of roles
+    //- enable changing teams
+    //- enable changing roles (make a base, or remove a base)
 
 - do better data logging
   - every click on enable/disable, even if it fails

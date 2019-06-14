@@ -28,7 +28,7 @@ Template.gameStart.events({
     gCode = event.target.gameCode.value;
     JoinGame.call({
       "playerId": Meteor.userId(), 
-      "playerName": Meteor.user().profile.name, 
+      "playerName": Meteor.user().username, 
       "gameCode": gCode, 
       "role": "player"
     }, (err, res) => {

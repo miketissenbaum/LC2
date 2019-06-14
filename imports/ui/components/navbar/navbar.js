@@ -24,7 +24,7 @@ Template.navBar.helpers({
        }
      }
      if (group != ""){
-       group = "Group: " + group;
+       group = group;
      }
      return group;
    },

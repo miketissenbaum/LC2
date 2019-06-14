@@ -5,7 +5,7 @@ import { Links } from '../../api/links/links.js';
 import { Producers } from '../../api/links/links.js';
 import { baseUsers } from '../both/index.js';
 
-basePass = "battery-honey-possible";
+basePass = "battery-honey";
 export const cityStart = {"res": {"m1": 2, "m2": 2, "f1": 2, "f2": 2}, "pollution": 0, "population": 5, "happiness": 5};
 
 Meteor.startup(() => {
@@ -43,7 +43,7 @@ Meteor.startup(() => {
     for (uname in baseUsers){
       Accounts.createUser({
         username: baseUsers[uname],
-        email : "base-" + baseUsers[uname] + "@bases.com",
+        email : baseUsers[uname] + "@base.com",
         password : basePass,
         profile  : {
             //publicly visible fields like firstname goes here

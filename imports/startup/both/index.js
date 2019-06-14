@@ -16,12 +16,44 @@ AccountsTemplates.configure({
   homeRoutePath: '/'
 });
 
+if (Meteor.isServer){
+    Meteor.methods({
+        "userExists": function(username){
+            return !!Meteor.users.findOne({username: username});
+        },
+    });
+}
+
+// AccountsTemplates.removeField('email');
 AccountsTemplates.addField({
     _id: 'name',
     type: 'text',
-    displayName: "Username/Full name",
+    displayName: "Full Name",
     // func: function(value){return value !== 'Full Name';},
     // errStr: 'Only "Full Name" allowed!',
+});
+
+
+AccountsTemplates.addField({
+    _id: 'username',
+    type: 'text',
+    required: true,
+    func: function(value){
+      if (Meteor.isClient) {
+          console.log("Validating username...");
+          var self = this;
+          Meteor.call("userExists", value, function(err, userExists){
+              if (!userExists)
+                  self.setSuccess();
+              else
+                  self.setError(userExists);
+              self.setValidating(false);
+          });
+          return;
+      }
+      // Server
+      return Meteor.call("userExists", value);
+    },
 });
 
 export const baseUsers = ["red-city", "green-city", "pink-city", "blue-city", "yellow-city", "orange-city", "turquoise-city", "fuschia-city"];
