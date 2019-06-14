@@ -302,8 +302,9 @@ export const ConsumeResources = new ValidatedMethod({
         affordableProds = [];
         // console.log(allProds);
         for (p in allProds){
+          prod = allProds[p];
           if (workers > 0){
-            prod = allProds[p];
+            
             affordable = true;
             for (r in prod.prodCosts) {
               if ((res[r] -  prod.prodCosts[r]) < 0) {
@@ -405,6 +406,7 @@ export const ConsumeResources = new ValidatedMethod({
       }
 
       SpreadPollution.call({"gameCode": gameCode});
+
       // SpreadPollution.call({"gameCode": gameCode}, function (err, res) {
       //   if (err) {console.log(err);}
       //   else {console.log(res);}
@@ -458,6 +460,8 @@ export const SpreadPollution = new ValidatedMethod({
         }
       }
     }
+    // newlog = {"allTeams": Games.find({$and: [{"role": "base"}, {"gameCode": gameCode}]}).fetch()};
+    // MakeLog.call({"key": "roundEndTeams", "log": newlog});
   }
 });
 
@@ -502,6 +506,7 @@ export const NewRound = new ValidatedMethod({
   run({gameCode, producerCount = 4}) {
     //reset factory notes, and team notes
     if (!this.isSimulation){
+      console.log("new rounding");
       ResetFactoryNotes.call({"gameCode": gameCode});
 
       ResetTeamNotes.call({"gameCode": gameCode});
@@ -523,9 +528,17 @@ export const NewRound = new ValidatedMethod({
                       if (err) {console.log(err);}
                     });
                 }
+
               }
+              endBases = {"allTeams": Games.find({$and: [{"role": "base"}, {"gameCode": gameCode}]}).fetch()};
+              MakeLog.call({"key": "roundEndTeams", "log": endBases});
+              ownedFacts = Producers.find({$and: [{"gameCode": gameCode}, {"owned": true}]}).fetch();
+              MakeLog.call({"key": "ownedFactories", "log": ownedFacts});
+              publicFacts = Producers.find({$and: [{"gameCode": gameCode}, {"owned": false}]}).fetch();
+              MakeLog.call({"key": "publicFactories", "log": publicFacts});
+
             }
-          });    
+          });
         }
       });
       

@@ -113,6 +113,9 @@ Template.adminGame.events({
     // instance.counter.set(instance.counter.get() + 1);
     NewRound.call({"gameCode": FlowRouter.getParam("gameCode")}, (err, res) => {
       if (err) {console.log(err);}
+      else {
+        console.log("round run!");
+      }
     })
   },
 
