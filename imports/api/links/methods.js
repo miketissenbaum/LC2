@@ -650,9 +650,9 @@ export const StartGame = new ValidatedMethod({
       allGames.forEach(function (game) {gameCodes.push(game.gameCode);});
       // console.log(baseList);
       console.log(gameCodes);
-      newgc = generate_random_string(4);
+      newgc = parseInt(Math.random()*100000).toString();
       while (newgc in gameCodes) {
-        newgc = generate_random_string(4);
+        newgc = parseInt(Math.random()*100000).toString();;
       }
 
       Games.insert({
