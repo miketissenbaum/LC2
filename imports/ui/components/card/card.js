@@ -16,7 +16,7 @@ Template.factoryList.onCreated(function helloOnCreated() {
   this.city = new ReactiveVar("city1");
 
   Meteor.subscribe('producers.public');
-  Meteor.subscribe('games.running');
+  Meteor.subscribe('games.minerunning');
   // Meteor.subscribe('bids.local');
   // Meteor.subscribe('assets.all');
 
@@ -126,7 +126,7 @@ Template.factoryList.events({
 
 Template.factoryList.onCreated(function helloOnCreated() {
   Meteor.subscribe('bids.local');
-  Meteor.subscribe('games.running');
+  Meteor.subscribe('games.minerunning');
 });
 
 Template.factory.helpers({
@@ -287,8 +287,8 @@ Template.factory.events({
     // console.log(event.target.text);
     console.log(event.target.name);
     val = parseInt(event.target.name);
-    thisGroup = Games.findOne({"gameCode": FlowRouter.getParam("gameCode")});
-
+    thisGroup = Games.findOne({$and: [{"gameCode": FlowRouter.getParam("gameCode")}, {"playerId": Meteor.userId()}]});
+    // console.log(thisGroup);
     if (thisGroup.role != "base") {
       FlowRouter.go('home');
     }

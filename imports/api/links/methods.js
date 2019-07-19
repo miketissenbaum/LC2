@@ -302,8 +302,9 @@ export const ConsumeResources = new ValidatedMethod({
         affordableProds = [];
         // console.log(allProds);
         for (p in allProds){
+          prod = allProds[p];
           if (workers > 0){
-            prod = allProds[p];
+            
             affordable = true;
             for (r in prod.prodCosts) {
               if ((res[r] -  prod.prodCosts[r]) < 0) {
@@ -405,6 +406,7 @@ export const ConsumeResources = new ValidatedMethod({
       }
 
       SpreadPollution.call({"gameCode": gameCode});
+
       // SpreadPollution.call({"gameCode": gameCode}, function (err, res) {
       //   if (err) {console.log(err);}
       //   else {console.log(res);}
@@ -458,6 +460,8 @@ export const SpreadPollution = new ValidatedMethod({
         }
       }
     }
+    // newlog = {"allTeams": Games.find({$and: [{"role": "base"}, {"gameCode": gameCode}]}).fetch()};
+    // MakeLog.call({"key": "roundEndTeams", "log": newlog});
   }
 });
 
@@ -502,6 +506,7 @@ export const NewRound = new ValidatedMethod({
   run({gameCode, producerCount = 4}) {
     //reset factory notes, and team notes
     if (!this.isSimulation){
+      console.log("new rounding");
       ResetFactoryNotes.call({"gameCode": gameCode});
 
       ResetTeamNotes.call({"gameCode": gameCode});
@@ -523,9 +528,17 @@ export const NewRound = new ValidatedMethod({
                       if (err) {console.log(err);}
                     });
                 }
+
               }
+              endBases = {"allTeams": Games.find({$and: [{"role": "base"}, {"gameCode": gameCode}]}).fetch()};
+              MakeLog.call({"key": "roundEndTeams", "log": endBases});
+              ownedFacts = Producers.find({$and: [{"gameCode": gameCode}, {"owned": true}]}).fetch();
+              MakeLog.call({"key": "ownedFactories", "log": ownedFacts});
+              publicFacts = Producers.find({$and: [{"gameCode": gameCode}, {"owned": false}]}).fetch();
+              MakeLog.call({"key": "publicFactories", "log": publicFacts});
+
             }
-          });    
+          });
         }
       });
       
@@ -637,9 +650,9 @@ export const StartGame = new ValidatedMethod({
       allGames.forEach(function (game) {gameCodes.push(game.gameCode);});
       // console.log(baseList);
       console.log(gameCodes);
-      newgc = generate_random_string(4);
+      newgc = parseInt(Math.random()*100000).toString();
       while (newgc in gameCodes) {
-        newgc = generate_random_string(4);
+        newgc = parseInt(Math.random()*100000).toString();;
       }
 
       Games.insert({
@@ -682,9 +695,58 @@ export const ToggleGameRunning = new ValidatedMethod({
   name: 'game.toggle',
   validate({}) {},
   run({gameCode, currentState}) {
-    var newState = "running";
-    if (currentState == "running") {newState = "paused";}
-    Games.update({"gameCode": gameCode}, {$set: {"status": newState}}, {multi: true});
+    if (!this.isSimulation) {
+      var newState = "running";
+      if (currentState == "running") {newState = "paused";}
+      Games.update({"gameCode": gameCode}, {$set: {"status": newState}}, {multi: true});
+    }
+  }
+});
+
+export const ChangeTeam = new ValidatedMethod({
+  name: 'team.change',
+  validate({}) {},
+  run({gameCode, player, group}) {
+    if (!this.isSimulation) {
+      Games.update({$and: [{"gameCode": gameCode}, {"playerName": player}]}, {$set: {"group": group}});
+    }
+  }
+});
+
+export const MakeBase = new ValidatedMethod({
+  name: 'team.new',
+  validate({}) {},
+  run({gameCode, playerName}) {
+    if (!this.isSimulation) {
+      player = Meteor.users.findOne({"profile.name": playerName});
+      if (player != undefined){
+        playerId = player._id;
+        JoinGame.call({"playerName": playerName, "playerId": playerId, "gameCode": gameCode, "role": "base", "neighbors": []});
+        bases = [];
+        Games.find({$and: [{"gameCode": gameCode}, {"role": "base"}]}).forEach(function (base) {
+          bases.push(base.playerName);
+        });
+      }
+      Games.update({$and: [{"gameCode": gameCode}, {"role": "admin"}]}, {$set: {groupList: bases}});
+    }
+  }
+});
+
+export const AddNeighbor = new ValidatedMethod({
+  name: 'team.neighbor',
+  validate({}) {},
+  run({gameCode, cityName, neighbor}) {
+    if (!this.isSimulation) {
+      if (neighbor != "empty") {
+        if (Games.findOne({$and: [{"gameCode": gameCode}, {"role": "base"}, {"playerName": neighbor}]}) != undefined){
+          Games.update({$and: [{"gameCode": gameCode}, {"role": "base"}, {"playerName": cityName}]}, {$addToSet: {"neighbors": neighbor}});
+        }
+      }
+      else {
+
+        Games.update({$and: [{"gameCode": gameCode}, {"role": "base"}, {"playerName": cityName}]}, {$set: {"neighbors": []}}); 
+      }
+    }
   }
 });
 
@@ -720,6 +782,13 @@ export const JoinGame = new ValidatedMethod({
       if (gameAdmin != undefined) {
 
         var group = playerName;
+        var deets = {
+          "gameCode": gameCode,
+          "playerName": playerName,
+          "playerId": playerId,
+          "role": role,
+          "status": "running",  
+        };
         if (role == "player"){
           //see which city has fewer players, and add to one of those cities.
           //re assign group in here.
@@ -732,26 +801,25 @@ export const JoinGame = new ValidatedMethod({
           });
           grp = sortedGroups[0].groupIndex;
           console.log("group is " + grp);
-          group = grp;  
+          group = grp;
+
         }
+        else if (role == "base") {
+          deets["res"] = {"m1": 2, "m2": 2, "f1": 2, "f2": 2};
+          deets["pollution"] = 2;
+          deets["population"] = 5;
+          deets["happiness"] = 5;
+          deets["neighbors"] = neighbors;
+        }
+
+        deets["group"] = group;
+
 
         Games.update({
           "gameCode": gameCode, 
-          "playerId": playerId
-        },{$set:{
-          "gameCode": gameCode, 
-          "playerName": playerName, 
           "playerId": playerId,
-          "role": role,
-          "status": "running",
-          "group": group,
-          // "factoryCount": factCount, 
-          "res": {"m1": 2, "m2": 2, "f1": 2, "f2": 2}, 
-          "pollution": 0, 
-          "population": 5, 
-          "happiness": 5,
-          "neighbors": neighbors
-        }}, {upsert: true});
+          "playerName": playerName
+        },{$set: deets}, {upsert: true});
 
       }
       else {
@@ -822,6 +890,16 @@ export const ChangeStat = new ValidatedMethod({
           // console.log(res);
         }
       });
+    }
+  }
+});
+
+export const userExists = new ValidatedMethod({
+  name: 'user.exists',
+  validate({}) {},
+  run ({username}) {
+    if (!this.isSimulation){
+      return !!Meteor.users.findOne({"username": username});
     }
   }
 });

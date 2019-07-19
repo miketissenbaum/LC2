@@ -52,21 +52,62 @@
     </tr>
     {{/each}}
   </table>
-  <p>
-    <button class="newRound btn btn-default">Next Round</button>
-  </p>
-  <br />
-  <p>
-    <button class="reset btn btn-default"> Reset everything </button>
-  </p>
-  <br />
-  <p>
-    <button class="btn btn-default seeScore">See scoreboard</button>
-  </p>
+  <p>    <button class="newRound btn btn-default">Next Round</button>  </p>
+  <p>    <button class="reset btn btn-default"> Reset everything </button>  </p>
+  <p>    <button class="btn btn-default seeScore">See scoreboard</button>  </p>
 
   Status: {{status}}
   <button class="btn btn-default toggleGameState">Toggle</button>
 
+  <!--  Change people's teams-->
+  <p>
+  <form class="changeTeam form-inline">
+    <div class="form-group">
+      <select class = "form-control" id="player" name="player">
+        {{#each gamePlayers}}
+          <option value = {{playerName}}>{{playerName}}</option>
+        {{/each}}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <select class = "form-control" id="team" name="team">
+        {{#each gameTeams}}
+          <option value = {{playerName}}>{{playerName}}</option>
+        {{/each}}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <input class="form-control" type="submit" value="Change Team"/>
+    </div>
+  </form>
+  </p>
+  <!--  Make a new player a base -->
+  <p>
+  <form class="makeBase form-inline">
+    <div class="form-group">
+      <input class = "form-control" type="text" name="playerName" placeholder="player" />
+    </div>
+    <div class="form-group">
+      <input class="form-control" type="submit" value="Make Base"/>
+    </div>
+  </form>
+  </p>
+  <!--  Set neighbors for a base -->
+  <p>
+  <form class="setNeighbors form-inline">
+    <div class="form-group">
+      <input class = "form-control" type="text" name="cityName" placeholder="city name" />
+    </div>
+    <div class="form-group">
+      <input class = "form-control" type="text" name="neighborName" placeholder="neighbor name" />
+    </div>
+    <div class="form-group">
+      <input class="form-control" type="submit" value="Add Neighbor"/>
+    </div>
+  </form>
+  </p>
 </template>
 
 <!-- <template name="adminGames">

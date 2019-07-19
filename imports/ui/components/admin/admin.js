@@ -7,6 +7,9 @@ import { ChangeStat } from '/imports/api/links/methods.js';
 import { NewRound } from '/imports/api/links/methods.js';
 import { StartGame } from '/imports/api/links/methods.js';
 import { ToggleGameRunning } from '/imports/api/links/methods.js';
+import { ChangeTeam } from '/imports/api/links/methods.js';
+import { MakeBase } from '/imports/api/links/methods.js';
+import { AddNeighbor } from '/imports/api/links/methods.js';
 import { Games } from '/imports/api/links/links.js';
 
 Template.adminView.onCreated(function helloOnCreated() {
@@ -61,6 +64,14 @@ Template.adminGame.helpers({
 
   status() {
     return Games.findOne({"gameCode": FlowRouter.getParam("gameCode")}).status;
+  },
+
+  gamePlayers() {
+    return Games.find({$and: [{"role": "player"}, {"gameCode": FlowRouter.getParam("gameCode")}]});
+  },
+
+  gameTeams() {
+    return Games.find({$and: [{"role": "base"}, {"gameCode": FlowRouter.getParam("gameCode")}]});
   }
 });
 
@@ -74,6 +85,23 @@ Template.adminGame.events({
     ChangeStat.call({"gameCode": FlowRouter.getParam("gameCode"), "group": event.target.resource.name, "resource": event.target.resource.value, "amount": event.target.amount.value});
   },
 
+  'submit .changeTeam' (event, instance) {
+    event.preventDefault();
+    console.log(event.target.team.value);
+    ChangeTeam.call({"gameCode": FlowRouter.getParam("gameCode"), "player": event.target.player.value, "group": event.target.team.value});
+  },
+
+  'submit .makeBase' (event, instance) {
+    event.preventDefault();
+    console.log(event.target.playerName.value);
+    MakeBase.call({"gameCode": FlowRouter.getParam("gameCode"), "playerName": event.target.playerName.value});
+  },
+
+  'submit .setNeighbors' (event, instance) {
+    event.preventDefault();
+    AddNeighbor.call({"gameCode": FlowRouter.getParam("gameCode"), "cityName": event.target.cityName.value, "neighbor": event.target.neighborName.value});
+  },
+
   'click .reset' (event, instance) {
     ResetAll.call({"gameCode": FlowRouter.getParam("gameCode")}, (err, res) => {
       if (err) {console.log(err);}
@@ -85,6 +113,9 @@ Template.adminGame.events({
     // instance.counter.set(instance.counter.get() + 1);
     NewRound.call({"gameCode": FlowRouter.getParam("gameCode")}, (err, res) => {
       if (err) {console.log(err);}
+      else {
+        console.log("round run!");
+      }
     })
   },
 

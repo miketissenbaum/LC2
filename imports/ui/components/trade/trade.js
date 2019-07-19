@@ -8,7 +8,7 @@ import { ResetAll } from '/imports/api/links/methods.js';
 Template.trade.onCreated(function helloOnCreated() {
   // counter starts at 0
   // this.counter = new ReactiveVar(0);
-  Meteor.subscribe('games.all');
+  Meteor.subscribe('games.running');
 });
 
 Template.trade.helpers({
